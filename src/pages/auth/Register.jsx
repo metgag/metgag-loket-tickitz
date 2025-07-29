@@ -6,7 +6,7 @@ export default function register() {
       <div className="bg-[url(../../public/avenger-bg.png)] bg-center bg-zinc-800 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen">
         <div class="d-flex justify-center">
           <div class="logo">
-            <img src="../../../public/tickitz-logo.png" width="192" alt="" />
+            <img src="tickitz-logo.png" width="192" alt="" />
           </div>
         </div>
         <div className="card bg-white flex flex-col justify-between rounded-md p-[2rem] w-[384px] h-[70vh]">
@@ -66,11 +66,11 @@ export default function register() {
 
           <div id="social" className="flex justify-between">
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="../../../public/social/google.svg" width="20" alt="" />
+              <img src="social/google.svg" width="20" alt="" />
               <p>Google</p>
             </button>
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="../../../public/social/fb.png" width="20" />
+              <img src="social/fb.png" width="20" />
               <p>Facebook</p>
             </button>
           </div>
