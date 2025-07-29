@@ -3,7 +3,12 @@ import { Fragment } from 'react'
 export default function register() {
   return (
     <Fragment>
-      <div className="bg-[url(../../public/avenger-bg.png)] bg-zinc-700 bg-blend-overlay flex items-center justify-center bg-cover w-screen h-screen">
+      <div className="bg-[url(../../public/avenger-bg.png)] bg-zinc-700 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen">
+        <div class="d-flex justify-center">
+          <div class="logo">
+            <img src="../../../public/tickitz-logo.png" width="192" alt="" />
+          </div>
+        </div>
         <div className="card bg-white flex flex-col justify-between rounded-md p-[2rem] w-[384px] h-[70vh]">
           <div className="steps flex items-center justify-between">
             <div className="step step-1 gap-[8px] flex flex-col items-center">
@@ -50,7 +55,7 @@ export default function register() {
               <input className="me-[12px] accent-[#1D4ED8]" type="checkbox" name="" id="terms" />
               <label className="text-[#696F79]" htmlFor="terms">I agree to terms & condition</label>
             </div>
-            <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] py-[.875rem] font-semibold" type="submit">Join For Free
+            <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer" type="submit">Join For Free
               Now</button>
             <p id="already" className="mx-auto font-medium text-[#696F79]">
               Already have an account? <a className="text-[#1D4ED8]" href="login.html">Log in</a></p>
