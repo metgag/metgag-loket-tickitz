@@ -3,7 +3,7 @@ import { Fragment } from 'react'
 export default function register() {
   return (
     <Fragment>
-      <div className="bg-[url(../../public/avenger-bg.png)] bg-zinc-700 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen">
+      <div className="bg-[url(../../public/avenger-bg.png)] bg-center bg-zinc-800 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen">
         <div class="d-flex justify-center">
           <div class="logo">
             <img src="../../../public/tickitz-logo.png" width="192" alt="" />
@@ -38,14 +38,14 @@ export default function register() {
           <form className="reg flex flex-col">
             <div className="flex flex-col">
               <label className="gray-primary" htmlFor="email">Email</label>
-              <input type="text" name="" id="email"
+              <input className="text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="" id="email"
                 placeholder="Enter your email" />
               <p id="erremail"></p>
             </div>
             <div className="flex flex-col">
               <label className="gray-primary" htmlFor="pwd">Password</label>
               <div className="pwd relative flex items-end">
-                <input className="w-full" type="password" name="" id="pwd"
+                <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="password" name="" id="pwd"
                   placeholder="Enter your password" />
                 <i className="nf nf-fa-eye absolute right-0 pe-[.875rem] translate-y-[-75%] hover:cursor-pointer hover:opacity-[.6]"></i>
               </div>
@@ -66,11 +66,11 @@ export default function register() {
 
           <div id="social" className="flex justify-between">
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="/assets/images/icon/google.svg" width="20" alt="" />
+              <img src="../../../public/social/google.svg" width="20" alt="" />
               <p>Google</p>
             </button>
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="/assets/images/icon/fb.png" width="20" />
+              <img src="../../../public/social/fb.png" width="20" />
               <p>Facebook</p>
             </button>
           </div>
