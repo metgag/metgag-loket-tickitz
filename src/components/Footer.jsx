@@ -6,7 +6,7 @@ export default function Footer() {
       <footer className="d-flex flex-col">
         <div className="top d-flex">
           <div className="foo-logo">
-            <img src="/assets/images/tickitz-blu.svg" alt="" />
+            <img src="/tickitz-blu.svg" alt="" />
             <p>Stop waiting in line. Buy tickets conveniently, watch movies
               quietly.</p>
           </div>
