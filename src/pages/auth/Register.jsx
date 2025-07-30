@@ -4,6 +4,8 @@ export default function Register() {
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
+  // const [err, setErr] = useState({ email: null, pwd: null });
+  // const [form, setForm] = useState({ email: "", pwd: "" });
 
   function handleVpwd(e) {
     setVpwd(() => {
@@ -11,6 +13,24 @@ export default function Register() {
       else return "password";
     });
   }
+
+  // function handleChange(e) {
+  //   setForm((form) => {
+  //     return {
+  //       ...form,
+  //       [e.target.name]: e.target.value
+  //     };
+  //   });
+  //   console.log(form.email);
+  //   if (form.email || form.email !== "") {
+  //     setErr((msg) => {
+  //       return {
+  //         ...msg,
+  //         [e.target.name]: "Field email tidak boleh kosong."
+  //       };
+  //     });
+  //   }
+  // }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -100,24 +120,27 @@ export default function Register() {
             </div>
           </div>
 
-          <form className="reg flex flex-col gap-[.5rem]" onSubmit={handleSubmit}>
+          <form className="reg flex flex-col gap-[.5rem]"
+            onSubmit={handleSubmit}
+            // onChange={handleChange}
+          >
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="email">Email</label>
-              <input className="text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="" id="email"
+              <input className="text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="email" id="email"
                 placeholder="Enter your email" />
               <p id="erremail" className="text-red-800 text-xs">{emailErr}</p>
             </div>
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="pwd">Password</label>
               <div className="pwd relative flex items-end">
-                <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="" id="pwd"
+                <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="pwd" id="pwd"
                   placeholder="Enter your password" />
                 <i onClick={handleVpwd} className="nf nf-fa-eye absolute right-0 pe-[.875rem] translate-y-[-120%] hover:cursor-pointer hover:opacity-[.6]"></i>
               </div>
               <p id="errpwd" className="text-red-800 text-xs">{pwdErr}</p>
             </div>
             <div className="flex items-center">
-              <input className="me-[12px] accent-[#1D4ED8]" type="checkbox" name="" id="terms" required />
+              <input required className="me-[12px] accent-[#1D4ED8]" type="checkbox" name="" id="terms" />
               <label className="text-[#696F79]" htmlFor="terms">I agree to terms & condition</label>
             </div>
             <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer" type="submit">Join For Free
