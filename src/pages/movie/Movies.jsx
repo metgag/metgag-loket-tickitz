@@ -6,6 +6,7 @@ import Footer from '../../components/Footer.jsx'
 
 export default function Movies() {
   const [movies, setMovies] = useState([]);
+  const [genres, setGenres] = useState([]);
 
   const apiToken = import.meta.env.VITE_API_TOKEN;
   const urlMovies = import.meta.env.VITE_MOVIES_URL;
@@ -44,6 +45,7 @@ export default function Movies() {
       });
 
       setMovies(movies);
+      setGenres(genres);
     })();
   }, []);
 
@@ -72,6 +74,12 @@ export default function Movies() {
 
             <div id="filter">
               <label htmlFor="">Filter</label>
+              <br />
+              {genres.map((genre) => {
+                return (
+                  <button>{genre.name}</button>
+                )
+              })}
             </div>
           </section>
 
@@ -87,7 +95,6 @@ export default function Movies() {
                 </div>
               </div> */}
               {movies.length > 0 && movies.map((movie) => {
-                console.log(movie);
                 return (
                   <div key={movie.id} className={`thumbnail-${movie.id}`}>
                     <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt="" />

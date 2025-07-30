@@ -7,7 +7,7 @@ import Movies from './pages/movie/Movies.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     {/* <Register /> */}
-    <Login />
-    {/* <Movies /> */}
+    {/* <Login /> */}
+    <Movies />
   </StrictMode>,
 )
