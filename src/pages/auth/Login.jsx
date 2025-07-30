@@ -6,7 +6,6 @@ export default function Login() {
   const [vpwd, setVpwd] = useState("password");
 
   function handleVpwd(e) {
-    console.log(e.className);
     setVpwd(() => {
       if (vpwd === "password") return "text";
       else return "password";
