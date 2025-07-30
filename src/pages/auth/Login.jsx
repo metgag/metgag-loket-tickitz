@@ -69,8 +69,8 @@ export default function Login() {
         </div>
         <div className="card bg-white flex flex-col justify-between rounded-md p-[2rem] w-[384px]">
           <div className="title">
-            <h2>Welcome Back👋</h2>
-            <p>Sign in with your data that you entered during your registration</p>
+            <h2 className="text-2xl text-[#121212] font-bold">Welcome Back👋</h2>
+            <p className="text-[#A0A3BD]">Sign in with your data that you entered during your registration</p>
           </div>
 
           <form className="reg flex flex-col" onSubmit={handleSubmit}>
