@@ -189,6 +189,7 @@ header nav {
         right: 0;
         top: 3rem;
         padding: .325rem;
+
         div {
             &:hover {
                 cursor: pointer;
@@ -351,6 +352,7 @@ button:not([disabled]):hover {
         .manage-usr {
             transform: translateX(-30%);
         }
+
         #profile-pic {
             transform: translateX(-80%);
         }
@@ -373,9 +375,10 @@ button:not([disabled]):hover {
             gap: .75rem;
             padding: .5rem;
             background-color: white;
-            
+
             a {
-                color: #0F172A; 
+                color: #0F172A;
+
                 &:hover {
                     opacity: .6;
                 }
