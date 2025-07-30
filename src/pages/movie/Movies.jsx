@@ -1,7 +1,6 @@
 import { Fragment, useState, useEffect } from 'react'
 import './global.css'
 import './style.css'
-import Navbar from '../../components/Navbar.jsx'
 import Footer from '../../components/Footer.jsx'
 
 export default function Movies() {
@@ -51,7 +50,6 @@ export default function Movies() {
 
   return (
     <Fragment>
-      <Navbar />
       <main className="d-flex flex-col">
         <div className="d-flex flex-col">
           <section id="hero-bg" className="d-flex flex-col justify-center">
