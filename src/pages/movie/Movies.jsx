@@ -1,7 +1,6 @@
 import { Fragment, useState, useEffect } from 'react'
 import './global.css'
 import './style.css'
-import Footer from '../../components/Footer.jsx'
 
 export default function Movies() {
   const [movies, setMovies] = useState([]);
@@ -123,7 +122,6 @@ export default function Movies() {
           </section>
         </div>
       </main>
-      <Footer />
     </Fragment>
   )
 }

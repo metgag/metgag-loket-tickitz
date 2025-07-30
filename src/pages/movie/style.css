@@ -242,8 +242,6 @@ section#newsletter {
     }
 }
 
-section.detail {}
-
 @media screen and (max-width: 768px) {
     section {
         padding-inline: 1.5rem;
