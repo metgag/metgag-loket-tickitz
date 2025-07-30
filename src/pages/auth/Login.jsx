@@ -67,20 +67,20 @@ export default function Login() {
             <img src="tickitz-logo.png" width="192" alt="" />
           </div>
         </div>
-        <div className="card bg-white flex flex-col justify-between rounded-md p-[2rem] w-[384px]">
-          <div className="title">
+        <div className="card bg-white flex gap-[1rem] flex-col justify-between rounded-md p-[2rem] w-[384px]">
+          <div className="title flex flex-col gap-[.375rem]">
             <h2 className="text-2xl text-[#121212] font-bold">Welcome Back👋</h2>
             <p className="text-[#A0A3BD]">Sign in with your data that you entered during your registration</p>
           </div>
 
-          <form className="reg flex flex-col" onSubmit={handleSubmit}>
-            <div className="flex flex-col">
+          <form className="reg flex flex-col gap-[.5rem]" onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="email">Email</label>
               <input className="text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="" id="email"
                 placeholder="Enter your email" />
               <p id="erremail" className="text-red-800 text-xs">{emailErr}</p>
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="pwd">Password</label>
               <div className="pwd relative flex items-end">
                 <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="" id="pwd"
