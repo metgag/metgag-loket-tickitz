@@ -96,12 +96,12 @@ export default function Movies() {
               </div> */}
               {movies.length > 0 && movies.map((movie) => {
                 return (
-                  <div key={movie.id} className={`thumbnail-${movie.id}`}>
+                  <div key={movie.id} className={`thumbnail-${movie.id} thumbnail`}>
                     <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt="" />
                     <h4>{movie.title}</h4>
                     <div className="genre">
                       {movie.genres.map((genre, id) => {
-                        return <p>{genre}</p>
+                        return <p key={id}>{genre}</p>
                       })}
                     </div>
                   </div>
