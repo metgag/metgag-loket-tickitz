@@ -9,7 +9,7 @@ section {
 }
 
 section#hero-bg {
-    background: linear-gradient(rgba(0, 0, 0, 0.6)), url("/assets/images/avenger-bg.png");
+    background: linear-gradient(rgba(0, 0, 0, 0.6)), url("/avenger-bg.png");
     background-size: cover;
     background-position-y: 56%;
     width: 100vw;
