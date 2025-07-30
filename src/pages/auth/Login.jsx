@@ -89,7 +89,7 @@ export default function Login() {
               </div>
               <p id="errpwd" className="text-red-800 text-xs">{pwdErr}</p>
             </div>
-            <a href="">Forgot your password?</a>
+            <a className="text-[#1D4ED8] text-end hover:opacity-[.6] cursor-pointer">Forgot your password?</a>
             <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer" type="submit">
               Login
             </button>
