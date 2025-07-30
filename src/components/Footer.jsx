@@ -22,10 +22,10 @@ export default function Footer() {
           <div className="sponsor">
             <h4>Our Sponsor</h4>
             <div className="spons-img d-flex flex-col">
-              <img src="/assets/images/sponsor/ebv.png" alt="" width="88" />
-              <img src="/assets/images/sponsor/cine.svg" alt=""
+              <img src="/sponsor/ebv.png" alt="" width="88" />
+              <img src="/sponsor/cine.svg" alt=""
                 width="124" />
-              <img src="/assets/images/sponsor/hif.svg" alt="" width="72" />
+              <img src="/sponsor/hif.svg" alt="" width="72" />
             </div>
           </div>
           <div className="follow">
