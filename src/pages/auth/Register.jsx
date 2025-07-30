@@ -68,7 +68,7 @@ export default function Register() {
 
   return (
     <Fragment>
-      <div className="bg-[url(../../public/avenger-bg.png)] bg-center bg-zinc-800 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen text-sm">
+      <div className="bg-[url(/avenger-bg.png)] bg-center bg-zinc-800 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen text-sm">
         <div className="d-flex justify-center">
           <div className="logo">
             <img src="tickitz-logo.png" width="192" alt="" />

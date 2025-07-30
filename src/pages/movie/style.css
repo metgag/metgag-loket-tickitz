@@ -92,7 +92,7 @@ section#watch-today {
 
     .movies-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 1.25rem;
 
         .thumbnail {
@@ -148,6 +148,7 @@ section#watch-today {
                 display: flex;
                 flex-direction: row;
                 gap: 1rem;
+                flex-wrap: wrap;
 
                 p {
                     background-color: #A0A3BD1A;
