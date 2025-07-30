@@ -17,7 +17,6 @@ export default function Login() {
     e.preventDefault();
     // destructure Array
     const [email, pwd] = e.target;
-    const storeForm = {};
     let [isEmail, isPwd] = [false, false];
 
     // Validasi Email
@@ -31,9 +30,6 @@ export default function Login() {
         setEmailErr(() => "Format email tidak sesuai");
       } else {
         setEmailErr("");
-        Object.assign(storeForm, {
-          email: email.value
-        });
         isEmail = true;
       }
     }
@@ -53,17 +49,13 @@ export default function Login() {
           setPwdErr("Password harus terdiri dari minimal 1 huruf besar dan kecil, dan 1 buah karakter spesial(!@#$%^&*/><)");
         } else {
           setPwdErr("");
-          Object.assign(storeForm, {
-            password: pwd.value
-          });
           isPwd = true;
         }
       }
     }
 
     if (isEmail && isPwd) {
-      localStorage.setItem("user", JSON.stringify(storeForm));
-      console.log("Data berhasil disimpan ke localStorage");
+      console.log("Login berhasil");
     }
   }
 
