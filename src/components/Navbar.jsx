@@ -16,7 +16,7 @@ export default function Navbar() {
           </div>
           <ul className="center d-flex fs-md">
             {pages.map((page, i) => {
-              return <li key={i}>{page}</li>
+              return <ListItem key={i} page={page} />
             })}
           </ul>
           <div className="account">
@@ -31,6 +31,10 @@ export default function Navbar() {
   )
 }
 
+/**
+ * User authentication button.
+ * @param {{ to: string, page: string }[]} props
+ */
 function AuthBtn(props) {
   return (
     <button key={props.i}>
@@ -41,6 +45,10 @@ function AuthBtn(props) {
   )
 }
 
+/**
+ * Create list for navigation.
+ * @param {string[]} props 
+ */
 function ListItem(props) {
   return <li key={props.i}>{props.page}</li>;
 }
