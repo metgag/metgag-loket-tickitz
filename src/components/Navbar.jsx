@@ -2,7 +2,11 @@ import { Fragment } from 'react'
 import { Link } from 'react-router'
 
 export default function Navbar() {
-  const pages = ["Home", "Movie", "Buy Ticket"];
+  const pages = [
+    { to: "/", page: "Home" },
+    { to: "/movies", page: "Movie" },
+    { to: "/order", page: "Buy Ticket" },
+  ];
   const auths = [
     { to: "/login", page: "SignIn" },
     { to: "/register", page: "Sign Up" }
@@ -16,7 +20,7 @@ export default function Navbar() {
           </div>
           <ul className="center d-flex fs-md">
             {pages.map((page, i) => {
-              return <ListItem key={i} page={page} />
+              return <ListItem i={i} to={page.to} page={page.page} />
             })}
           </ul>
           <div className="account">
@@ -50,5 +54,11 @@ function AuthBtn(props) {
  * @param {string[]} props 
  */
 function ListItem(props) {
-  return <li key={props.i}>{props.page}</li>;
+  return (
+    <li key={props.i}>
+      <Link to={props.to}>
+        {props.page}
+      </Link >
+    </li>
+  )
 }
