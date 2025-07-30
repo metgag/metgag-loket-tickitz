@@ -31,13 +31,13 @@ export default function Footer() {
           <div className="follow">
             <h4>Follow us</h4>
             <div className="social d-flex flex-col">
-              <a href=""><img src="/assets/images/social/fb.svg" alt="" />
+              <a href=""><img src="/social/fb.svg" alt="" />
               </a>
-              <a href=""><img src="/assets/images/social/ig.svg" alt="" />
+              <a href=""><img src="/social/ig.svg" alt="" />
               </a>
-              <a href=""><img src="/assets/images/social/tw.svg" alt="" />
+              <a href=""><img src="/social/tw.svg" alt="" />
               </a>
-              <a href=""><img src="/assets/images/social/yt.svg"
+              <a href=""><img src="/social/yt.svg"
                 alt="" /></a>
             </div>
           </div>
