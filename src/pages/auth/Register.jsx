@@ -1,11 +1,18 @@
 import { Fragment, useState } from 'react'
+import { useNavigate } from 'react-router'
+import Step from '../../components/Step'
 
 export default function Register() {
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
-  // const [err, setErr] = useState({ email: null, pwd: null });
-  // const [form, setForm] = useState({ email: "", pwd: "" });
+  const navigate = useNavigate();
+
+  const stepItem = [
+    { how: "Fill Form", bg: "#1D4ED8", color: "#4E4B66" },
+    { how: "Activate", bg: "#A0A3BD", color: "#A0A3BD" },
+    { how: "Done", bg: "#A0A3BD", color: "#A0A3BD" },
+  ];
 
   function handleVpwd(e) {
     setVpwd(() => {
@@ -13,24 +20,6 @@ export default function Register() {
       else return "password";
     });
   }
-
-  // function handleChange(e) {
-  //   setForm((form) => {
-  //     return {
-  //       ...form,
-  //       [e.target.name]: e.target.value
-  //     };
-  //   });
-  //   console.log(form.email);
-  //   if (form.email || form.email !== "") {
-  //     setErr((msg) => {
-  //       return {
-  //         ...msg,
-  //         [e.target.name]: "Field email tidak boleh kosong."
-  //       };
-  //     });
-  //   }
-  // }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -82,7 +71,8 @@ export default function Register() {
 
     if (isEmail && isPwd) {
       localStorage.setItem("user", JSON.stringify(storeForm));
-      console.log("Data berhasil disimpan ke localStorage");
+      // console.log("Data berhasil disimpan ke localStorage");
+      navigate("/auth/login");
     }
   }
 
@@ -96,39 +86,20 @@ export default function Register() {
         </div>
         <div className="card bg-white flex gap-[1rem] flex-col justify-between rounded-md p-[2rem] w-[384px]">
           <div className="steps flex items-center justify-between">
-            <div className="step step-1 gap-[8px] flex flex-col items-center">
-              <div className="dot w-[32px] h-[32px] bg-[#1D4ED8] rounded-full grid place-items-center text-white">1</div>
-              <p className="how">Fill Form</p>
-            </div>
-            <div className="dash-line">
-              <img src="/assets/images/dash-line.svg" alt="" />
-            </div>
-            <div className="step step-2 gap-[8px] flex flex-col items-center">
-              <div className="dot w-[32px] h-[32px] rounded-full bg-[#A0A3BD] grid place-items-center text-white">
-                <p>2</p>
-              </div>
-              <p className="how">Activate</p>
-            </div>
-            <div className="dash-line">
-              <img src="/assets/images/dash-line.svg" alt="" />
-            </div>
-            <div className="step step-3 gap-[8px] flex flex-col items-center">
-              <div className="dot w-[32px] h-[32px] rounded-full bg-[#A0A3BD] grid place-items-center text-white">
-                <p>3</p>
-              </div>
-              <p className="how">Done</p>
-            </div>
+            {stepItem.map((item, i) => {
+              return <Step i={i} how={item.how} bg={item.bg} color={item.color} />
+            })}
           </div>
 
           <form className="reg flex flex-col gap-[.5rem]"
             onSubmit={handleSubmit}
-            // onChange={handleChange}
+          // onChange={handleChange}
           >
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="email">Email</label>
               <input className="text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="email" id="email"
                 placeholder="Enter your email" />
-              <p id="erremail" className="text-red-800 text-xs">{emailErr}</p>
+              <p id="erremail" className="text-red-800 text-xs font-semibold">{emailErr}</p>
             </div>
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="pwd">Password</label>
@@ -137,7 +108,7 @@ export default function Register() {
                   placeholder="Enter your password" />
                 <i onClick={handleVpwd} className="nf nf-fa-eye absolute right-0 pe-[.875rem] translate-y-[-120%] hover:cursor-pointer hover:opacity-[.6]"></i>
               </div>
-              <p id="errpwd" className="text-red-800 text-xs">{pwdErr}</p>
+              <p id="errpwd" className="text-red-800 text-xs font-semibold">{pwdErr}</p>
             </div>
             <div className="flex items-center">
               <input required className="me-[12px] accent-[#1D4ED8]" type="checkbox" name="" id="terms" />
@@ -146,7 +117,7 @@ export default function Register() {
             <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer" type="submit">Join For Free
               Now</button>
             <p id="already" className="mx-auto font-medium text-[#696F79]">
-              Already have an account? <a className="text-[#1D4ED8]" href="login.html">Log in</a></p>
+              Already have an account? <a className="text-[#1D4ED8] underline" href="login.html">Log in</a></p>
             <div id="or" className="flex justify-center">
               <p className="text-[#AAAAAA]">Or</p>
             </div>
@@ -154,11 +125,11 @@ export default function Register() {
 
           <div id="social" className="flex justify-between">
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="social/google.svg" width="20" alt="" />
+              <img src="/social/google.svg" width="20" alt="" />
               <p>Google</p>
             </button>
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="social/fb.png" width="20" />
+              <img src="/social/fb.png" width="20" />
               <p>Facebook</p>
             </button>
           </div>
