@@ -5,7 +5,7 @@ export default function userAvail() {
 
   if (localStorage.getItem("user")) {
     return setTimeout(() => {
-      navigate("/movie");
+      navigate("/");
     }, 1500);
   }
 
