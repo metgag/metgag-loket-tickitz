@@ -146,7 +146,7 @@ export default function Movies() {
           </div>
         </section>
 
-        <Subscription mx={"28"} />
+        <Subscription mx={"mx-28"} />
       </div>
     </main>
   )
