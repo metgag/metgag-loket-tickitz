@@ -1,13 +1,17 @@
 import { Fragment, useState, useEffect } from 'react'
-import './global.css'
-import './style.css'
+import { Link, useSearchParams } from 'react-router'
+import Subscription from '../../components/Subscription'
 
 export default function Movies() {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams({ page: 1 });
+  const [urlMov, setUrlMov] = useState(
+    `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`
+  );
 
   const apiToken = import.meta.env.VITE_API_TOKEN;
-  const urlMovies = import.meta.env.VITE_MOVIES_URL;
+  const urlMovies = `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`;
   const urlGenres = import.meta.env.VITE_GENRES_URL;
   const options = {
     method: 'GET',
@@ -45,83 +49,105 @@ export default function Movies() {
       setMovies(movies);
       setGenres(genres);
     })();
-  }, []);
+  }, [searchParams]);
 
   return (
-    <Fragment>
-      <main className="d-flex flex-col">
-        <div className="d-flex flex-col">
-          <section id="hero-bg" className="d-flex flex-col justify-center">
-            {/* <!-- <div class="hero-bg"></div> --> */}
-            <h4>LIST MOVIE OF THE WEEK</h4>
-            <h1>Experience the Magic of Cinema: Book Your Tickets Today</h1>
-            <div id="pg-num" className="d-flex flex-row">
-              <div className="pg pg-1"></div>
-              <div className="pg pg-2"></div>
-              <div className="pg pg-3"></div>
-            </div>
-          </section>
+    <main className="flex flex-col">
+      <div className="flex flex-col gap-12">
+        <section id="hero-bg"
+          className="px-28 gap-6 mb-3 flex relative flex-col justify-center 
+          bg-[url(/avenger-bg.png)] bg-blend-overlay bg-zinc-600 h-[56vh] 
+          bg-cover w-screen bg-center"
+        >
+          <h4 className='text-white text-lg font-bold'>
+            LIST MOVIE OF THE WEEK
+          </h4>
+          <h1 className='text-white text-5xl w-156'>
+            Experience the Magic of Cinema: Book Your Tickets Today
+          </h1>
+          <div id="pg-num" className="flex">
+            <div className="pg pg-1"></div>
+            <div className="pg pg-2"></div>
+            <div className="pg pg-3"></div>
+          </div>
+        </section>
 
-          <section id="event" className="d-flex">
-            <form action="">
-              <label htmlFor="f-event">Cari Event</label>
-              <input type="text" name="" id="f-event"
-                placeholder="New Born Expert" />
-            </form>
+        <section id="event" className="flex px-28 gap-6">
+          <form action="" className='flex flex-col gap-4'>
+            <label htmlFor="f-event" className='text-[#4E4B66]'>
+              Cari Event
+            </label>
+            <input type="text" name="" id="f-event"
+              placeholder="New Born Expert"
+              className='p-3 border border-[#DEDEDE] rounded-sm 
+              placeholder:text-[#A0A3BD]' />
+          </form>
 
-            <div id="filter">
-              <label htmlFor="">Filter</label>
-              <br />
-              {genres.map((genre) => {
+          <div id="filter" className='flex flex-col gap-4'>
+            <label htmlFor="" className='text-[#4E4B66]'>Filter</label>
+            <div className='flex flex-wrap'>
+              {genres.slice(0, 8).map((genre) => {
                 return (
-                  <button>{genre.name}</button>
+                  <button className='p-2 px-4 hover:bg-[#1D4ED8] 
+                  hover:cursor-pointer hover:text-white rounded-xl'>
+                    {genre.name}
+                  </button>
                 )
               })}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section id="watch-today" className="d-flex flex-col align-center">
-            <div className="movies-grid">
-              {/* <div className="thumbnail thumbnail-1">
-                <img src="/assets/images/thumbnail/thumb-bl-widow.png"
-                  alt="" />
-                <h4>Black Widow</h4>
-                <div className="genre">
-                  <p>Action</p>
-                  <p>Adventure</p>
-                </div>
-              </div> */}
-              {movies.length > 0 && movies.map((movie) => {
-                return (
-                  <div key={movie.id} className={`thumbnail-${movie.id} thumbnail`}>
-                    <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt="" />
-                    <h4>{movie.title}</h4>
-                    <div className="genre">
-                      {movie.genres.map((genre, id) => {
-                        return <p key={id}>{genre}</p>
-                      })}
-                    </div>
+        <section id="watch-today" className="flex px-28 flex-col items-center">
+          <div className="movies-grid grid grid-cols-4 gap-8">
+            {movies.length > 0 && movies.map((movie) => {
+              return (
+                <div key={movie.id} className={`thumbnail-${movie.id} 
+                  flex flex-col gap-3`}>
+                  <Link to={`/movie/detail/${movie.id}`}>
+                    <img className="hover:opacity-[.8] hover:cursor-pointer 
+                    rounded-md"
+                      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                      alt=""
+                    />
+                  </Link>
+                  <h4 className='text-[#14142B] font-bold text-lg'>
+                    {movie.title}
+                  </h4>
+                  <div className="genre flex flex-wrap gap-3">
+                    {movie.genres.map((genre, id) => {
+                      return <p key={id} className='px-3 rounded-full 
+                      text-[#A0A3BD] bg-[#A0A3BD1A]'>
+                        {genre}
+                      </p>
+                    })}
                   </div>
-                )
-              })}
-            </div>
-            <div id="pg-nav" className="d-flex">
-              <button>1</button><button>2</button><button>3</button><button>4</button>
-              <button><i className="nf nf-oct-arrow_right"></i></button>
-            </div>
-          </section>
+                </div>
+              )
+            })}
+          </div>
+          <div id="pg-nav" className="flex gap-4">
+            {[1, 2, 3, 4].map((e, i) => {
+              return <button key={i}
+                className="text-[#4E4B66] size-8 flex items-center 
+                  justify-center rounded-full hover:bg-[#1D4ED8] 
+                  hover:text-white hover:border-none hover:cursor-pointer 
+                  hover:[#FFFFFF]"
+                onClick={() => {
+                  setSearchParams((param) => {
+                    return param.set("page", e);
+                  });
+                }}
+              >
+                {e}
+              </button>
+            })}
+            <button><i className="nf nf-oct-arrow_right"></i></button>
+          </div>
+        </section>
 
-          <section className="bg-blue d-flex flex-col align-center" id="newsletter">
-            <h1>Subscribe to our newsletter</h1>
-            <form className="d-flex" action="">
-              <input type="text" placeholder="First name" />
-              <input type="email" placeholder="Email address" />
-              <button>Subscribe Now</button>
-            </form>
-            <div className="circle"></div>
-          </section>
-        </div>
-      </main>
-    </Fragment>
+        <Subscription mx={"28"} />
+      </div>
+    </main>
   )
 }
