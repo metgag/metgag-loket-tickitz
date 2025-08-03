@@ -1,9 +1,12 @@
 import { Fragment, useState } from 'react'
+import userAvail from '../../utils/userAvail.js'
 
 export default function Login() {
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
+
+  userAvail();
 
   function handleVpwd(e) {
     setVpwd(() => {
@@ -99,11 +102,11 @@ export default function Login() {
 
           <div id="social" className="flex justify-between">
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="social/google.svg" width="20" alt="" />
+              <img src="/social/google.svg" width="20" alt="" />
               <p>Google</p>
             </button>
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="social/fb.png" width="20" />
+              <img src="/social/fb.png" width="20" />
               <p>Facebook</p>
             </button>
           </div>
