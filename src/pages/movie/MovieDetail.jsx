@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router"
+import { useNavigate, useParams } from "react-router"
 import { format } from 'date-fns'
 
 function MovieDetail() {
   const { movieId } = useParams();
   const [detail, setDetail] = useState({});
   const [genres, setGenres] = useState([]);
+  const navigate = useNavigate();
+
   const options = {
     method: 'GET',
     headers: {
@@ -24,7 +26,7 @@ function MovieDetail() {
     fetch(`${import.meta.env.VITE_DETAIL_URL}${movieId}`, options)
       .then(res => res.json())
       .then(res => {
-        console.log(res);
+        // console.log(res);
         const { runtime, title, release_date, overview, genres, backdrop_path, poster_path } = res;
         const fDate = format(new Date(release_date), "MMMM dd, yyyy");
         const result = {
@@ -41,6 +43,34 @@ function MovieDetail() {
       })
       .catch(err => console.error(err));
   }, []);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    let result = {};
+    let genre = {
+      movGenres: genres
+    };
+
+    for (let i = 0; i < 3; i++) {
+      Object.assign(result, {
+        [e.target[i].name]: e.target[i].value
+      });
+    }
+
+    if (Object.keys(result).length > 0) {
+      setDetail((set) => {
+        return Object.assign(set, result);
+      });
+
+      if (localStorage.getItem("detail")) {
+        localStorage.removeItem("detail");
+      }
+
+      localStorage.setItem("detail", JSON.stringify(detail));
+      // console.log(detail)
+      navigate("/movie/order")
+    }
+  }
 
   return (
     <main className="flex flex-col relative gap-12">
@@ -87,22 +117,28 @@ function MovieDetail() {
         </div>
       </section>
 
-      <section id="book" className="flex flex-col gap-6 px-28">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 px-28">
         <h2 className="text-2xl text-[#121212]">Book Tickets</h2>
         <div className="grid-cont grid grid-cols-4 gap-4">
           <h4 className="font-semibold">Choose Date</h4>
           <h4 className="font-semibold">Choose Time</h4>
           <h4 className="font-semibold col-span-2">Choose Location</h4>
-          <select name="" className={selGray}>
-            <option value="">21/07/20</option>
+          <select name="date" className={selGray}>
+            <option value="14/07/20">14/07/20</option>
+            <option value="21/07/20">21/07/20</option>
+            <option value="28/07/20">28/07/20</option>
           </select>
-          <select name="" className={selGray}>
-            <option value="">08 : 30 AM</option>
+          <select name="time" className={selGray}>
+            <option value="08 : 30 AM">08 : 30 AM</option>
+            <option value="09 : 30 AM">09 : 30 AM</option>
+            <option value="10 : 30 AM">10 : 30 AM</option>
           </select>
-          <select name="" className={selGray}>
-            <option value="">Purwokerto</option>
+          <select name="location" className={selGray}>
+            <option value="Bandung">Bandung</option>
+            <option value="Bogor">Bogor</option>
+            <option value="Purwokerto">Purwokerto</option>
           </select>
-          <button className={btnBlu}>Filter</button>
+          <button disabled className={btnBlu}>Filter</button>
         </div>
         <div className="choose-cinema flex flex-col gap-6">
           <div className="title flex gap-8">
@@ -129,9 +165,13 @@ function MovieDetail() {
             <div className={pgStyle}>3</div>
             <div className={pgStyle}>4</div>
           </div>
-          <button className={`${btnBlu} w-max self-center p-2 px-12`}>Book Now</button>
+          <button className={`${btnBlu} w-max self-center p-2 px-12`}
+            type="submit"
+          >
+            Book Now
+          </button>
         </div>
-      </section>
+      </form>
     </main>
   )
 }
