@@ -6,6 +6,8 @@ import { format } from 'date-fns'
 
 export default function Index() {
   const [movies, setMovies] = useState([]);
+  const [sliceLen, setSliceLen] = useState([0, 4]);
+
   const whyChoose = [
     { title: "Guaranteed", img: "/icon/shield-done.svg" },
     { title: "Affordable", img: "/icon/check-circle.svg" },
@@ -16,6 +18,7 @@ export default function Index() {
   const rounded = `rounded-full text-xl size-[2.5rem] bg-[#A0A3BD] 
     hover:bg-[#1D4ED8] hover:cursor-pointer flex items-center justify-center
     text-white`;
+  const rSect = "text-center items-center md:text-left";
 
   const apiToken = import.meta.env.VITE_API_TOKEN;
   const urlMovies = import.meta.env.VITE_MOVIES_URL;
@@ -59,10 +62,25 @@ export default function Index() {
     })();
   }, []);
 
+  function handlePage(e) {
+    if (e.target.className.includes("right")) {
+      setSliceLen((e) => {
+        if (e[0] == 16 && e[1] == 20) return e;
+        return e.map((f) => f + 1);
+      });
+    } else {
+      setSliceLen((e) => {
+        if (e[0] == 0 && e[1] == 4) return e;
+        return e.map((f) => f - 1);
+      });
+    }
+  }
+
   return (
-    <main className="flex flex-col px-28 gap-12">
-      <section id="hero" className="flex h-[88vh] items-center">
-        <div className="l-items flex flex-col gap-4 justify-center">
+    <main className="flex flex-col md:px-28 gap-12">
+      <section id="hero"
+        className={`flex flex-col h-[88vh] md:flex-row ${rSect}`}>
+        <div className="l-items flex flex-col gap-4 justify-center text-center md:text-left">
           <h4 className={hBlu}>MOVIE TICKET PURCHASES #1 IN INDONESIA</h4>
           <h1 className="text-5xl text-[#121212]">
             Experience the Magic of Cinema: Book Your Tickets Today
@@ -91,12 +109,12 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="choose" className="flex flex-col gap-6">
+      <section id="choose" className={`flex flex-col gap-6 items-center md:items-start`}>
         <h4 className={hBlu}>WHY CHOOSE US</h4>
-        <h3 className={`${hBlk} w-[40%]`}>
+        <h3 className={`${hBlk} md:w-[40%]`}>
           Unleashing the Ultimate Movie Experience
         </h3>
-        <div id="point" className="flex flex-row gap-6">
+        <div id="point" className="flex flex-col gap-8 md:flex-row">
           {whyChoose.map((choose, i) => {
             return <ChooseItem i={i} title={choose.title} img={choose.img} />
           })}
@@ -125,15 +143,14 @@ export default function Index() {
         <h4 className={hBlu}>UPCOMING MOVIES</h4>
         <div className="soon flex items-center justify-between w-full">
           <h3 className={hBlk}>Exciting Movie Coming Soon</h3>
-          <div className="btn-right flex gap-1">
-            <div href="" className={rounded}>
-              <i className="nf nf-oct-arrow_left"></i></div>
-            <div href="" className={rounded}>
-              <i className="nf nf-oct-arrow_right"></i></div>
+          <div onClick={handlePage}
+            className="btn-right flex gap-1">
+            <i className={`nf nf-oct-arrow_left ${rounded}`}></i>
+            <i className={`nf nf-oct-arrow_right ${rounded}`}></i>
           </div>
         </div>
         <div className="movies flex gap-4 self-center">
-          {movies.slice(8, 12).map((movie, i) => {
+          {movies.slice(sliceLen[0], sliceLen[1]).map((movie, i) => {
             return <MovieCard i={i} title={movie.title}
               poster={movie.poster_path} genres={movie.genres}
               release={movie.fDate} />
