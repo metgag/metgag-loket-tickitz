@@ -123,7 +123,7 @@ export default function Index() {
 
       <section id="watch-today" className="flex flex-col gap-4 items-center">
         <h4 className={hBlu}>MOVIES</h4>
-        <h3 className={`${hBlk} w-116 text-center`}>
+        <h3 className={`${hBlk} text-center w-[40%]`}>
           Exciting Movies That Should Be Watched Today
         </h3>
         <div className="movies flex gap-4 px">
@@ -139,7 +139,9 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="coming-soon" className="flex flex-col gap-4">
+      <section id="coming-soon"
+        className="flex flex-col gap-4 text-center md:items-start"
+      >
         <h4 className={hBlu}>UPCOMING MOVIES</h4>
         <div className="soon flex items-center justify-between w-full">
           <h3 className={hBlk}>Exciting Movie Coming Soon</h3>
