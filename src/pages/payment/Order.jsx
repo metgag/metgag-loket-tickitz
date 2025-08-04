@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router';
 
 function Order() {
   const [seat, setSeat] = useState([]);
+  const [detail,] = useState(
+    JSON.parse(localStorage.getItem("detail"))
+  );
+  const [total, setTotal] = useState(0);
   const navigate = useNavigate();
+
+  console.log(detail)
 
   const details = [
     { head: "Movie Selected", content: "Spider-Man: Homecoming" },
@@ -31,9 +37,11 @@ function Order() {
     if (e.target.type === "checkbox") {
       setSeat((arrSeat) => {
         if (!arrSeat.includes(e.target.id)) {
+          setTotal((total) => total + .5);
           return [...arrSeat, e.target.id];
         } else {
           if (arrSeat.length > 0) {
+            setTotal((total) => total - .5);
             return arrSeat.filter((seat) => seat !== e.target.id);
           }
         }
@@ -62,14 +70,16 @@ function Order() {
       <div className="flex-container flex justify-center gap-4">
         <div className="flex flex-col gap-6 bg-white p-4 py-6 rounded-lg">
           <div className="movie-detail flex border justify-between p-4 gap-4 border-[#DEDEDE] rounded-md">
-            <div className="sman-thumb bg-[url(/thumbnail/thumb-babayaga.png)] bg-cover rounded-sm h-28 w-48"></div>
+            <img
+              src={`${import.meta.env.VITE_POSTER_URL}${detail.backdrop_path}`}
+              className="object-cover rounded-sm h-28 w-48" />
             <div className="detail flex flex-col justify-between">
-              <h3 className={hBlk}>Spider-Man: Homecoming</h3>
+              <h3 className={hBlk}>{detail.title}</h3>
               <div className="genre flex flex-wrap gap-2">
                 <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Action</p>
                 <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Adventure</p>
               </div>
-              <p>Regular - 13:00 PM</p>
+              <p>{`Regular - ${detail.time}`}</p>
             </div>
             <button
               className={`${btnBlu}`}>
@@ -126,7 +136,7 @@ function Order() {
             </div>
           </div>
         </div>
-        <aside className="flex flex-col h-min gap-8">
+        <aside className="flex flex-col h-min gap-8 min-w-md">
           <div className="cinema bg-white flex p-4 py-6 flex-col gap-6 rounded-lg shadow-md">
             <div className="cinema-name flex flex-col items-center gap-2">
               <img src="/sponsor/cine.svg" alt="" />
@@ -138,13 +148,15 @@ function Order() {
               <div className="title flex justify-between gap-[1.5rem]">
                 <p className="text-[#6B6B6B]">Movie Selected</p>
                 <p className="text-[#14142B] font-semibold">
-                  Spider-Man: Homecoming
+                  {detail.title}
                 </p>
               </div>
               <div className="date flex justify-between gap-[1.5rem]">
-                <p className="text-[#6B6B6B]">Tuesday, 07 July 2020</p>
+                <p className="text-[#6B6B6B]">
+                  {detail.date}
+                </p>
                 <p className="text-[#14142B] font-semibold">
-                  13:00pm
+                  {detail.time}
                 </p>
               </div>
               <div className="price flex justify-between gap-[1.5rem]">
@@ -164,7 +176,9 @@ function Order() {
             <div
               className="total pt-5 flex justify-between items-center border-t border-[#E6E6E6]">
               <h4 className="font-medium text-lg">Total Payment</h4>
-              <h3 className='text-[#1D4ED8] text-2xl font-semibold'>$30</h3>
+              <h3 className='text-[#1D4ED8] text-2xl font-semibold'>
+                {`$${total * 10}`}
+              </h3>
             </div>
           </div>
           <button
