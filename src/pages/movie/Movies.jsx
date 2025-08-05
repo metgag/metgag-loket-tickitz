@@ -5,6 +5,7 @@ import Subscription from '../../components/Subscription'
 export default function Movies() {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
+  const [search, setSearch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams({ page: 1 });
   const [urlMov, setUrlMov] = useState(
     `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`
@@ -51,6 +52,11 @@ export default function Movies() {
     })();
   }, [searchParams]);
 
+  function handleSearch(e) {
+    const input = (e.target.value);
+    setSearch(() => input);
+  }
+
   return (
     <main className="flex flex-col">
       <div className="flex flex-col gap-12">
@@ -73,20 +79,23 @@ export default function Movies() {
         </section>
 
         <section id="event" className="flex px-28 gap-6">
-          <form action="" className='flex flex-col gap-4'>
-            <label htmlFor="f-event" className='text-[#4E4B66]'>
-              Cari Event
+          <form
+            className='flex flex-col gap-4'>
+            <label htmlFor="find" className='text-[#4E4B66] w-max'>
+              Cari Movie
             </label>
-            <input type="text" name="" id="f-event"
-              placeholder="New Born Expert"
-              className='p-3 border border-[#DEDEDE] rounded-sm 
+            <div className='flex'>
+              <input onChange={handleSearch} type="text" name="" id="find"
+                placeholder="New Born Expert"
+                className='p-3 border border-[#DEDEDE] rounded-sm 
               placeholder:text-[#A0A3BD]' />
+            </div>
           </form>
 
           <div id="filter" className='flex flex-col gap-4'>
             <label htmlFor="" className='text-[#4E4B66]'>Filter</label>
             <div className='flex flex-wrap'>
-              {genres.slice(0, 8).map((genre) => {
+              {genres.map((genre) => {
                 return (
                   <button className='p-2 px-4 hover:bg-[#1D4ED8] 
                   hover:cursor-pointer hover:text-white rounded-xl'>
@@ -100,49 +109,53 @@ export default function Movies() {
 
         <section id="watch-today" className="flex px-28 flex-col items-center">
           <div className="movies-grid grid grid-cols-4 gap-8">
-            {movies.length > 0 && movies.map((movie) => {
-              return (
-                <div key={movie.id} className={`thumbnail-${movie.id} 
+            {movies.length > 0 &&
+              movies
+                .filter((movie) => {
+                  if (!search) return true;
+                  return movie.title.toLowerCase().includes(search.toLowerCase());
+                })
+                .map((movie) => {
+                  return (
+                    <div key={movie.id} className={`thumbnail-${movie.id} 
                   flex flex-col gap-3`}>
-                  <Link to={`/movie/detail/${movie.id}`}>
-                    <img className="hover:opacity-[.8] hover:cursor-pointer 
+                      <Link to={`/movie/detail/${movie.id}`}>
+                        <img className="hover:opacity-[.8] hover:cursor-pointer 
                     rounded-md"
-                      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                      alt=""
-                    />
-                  </Link>
-                  <h4 className='text-[#14142B] font-bold text-lg'>
-                    {movie.title}
-                  </h4>
-                  <div className="genre flex flex-wrap gap-3">
-                    {movie.genres.map((genre, id) => {
-                      return <p key={id} className='px-3 rounded-full 
+                          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                          alt=""
+                        />
+                      </Link>
+                      <h4 className='text-[#14142B] font-bold text-lg'>
+                        {movie.title}
+                      </h4>
+                      <div className="genre flex flex-wrap gap-3">
+                        {movie.genres.map((genre, id) => {
+                          return <p key={id} className='px-3 rounded-full 
                       text-[#A0A3BD] bg-[#A0A3BD1A]'>
-                        {genre}
-                      </p>
-                    })}
-                  </div>
-                </div>
-              )
-            })}
+                            {genre}
+                          </p>
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
           </div>
-          <div id="pg-nav" className="flex gap-4">
+          <div id="pg-nav" className="flex items-center gap-4">
             {[1, 2, 3, 4].map((e, i) => {
               return <button key={i}
                 className="text-[#4E4B66] size-8 flex items-center 
                   justify-center rounded-full hover:bg-[#1D4ED8] 
                   hover:text-white hover:border-none hover:cursor-pointer 
                   hover:[#FFFFFF]"
-                onClick={() => {
-                  setSearchParams((param) => {
-                    return param.set("page", e);
-                  });
-                }}
               >
                 {e}
               </button>
             })}
-            <button><i className="nf nf-oct-arrow_right"></i></button>
+            <i
+              className="nf nf-oct-arrow_right p-2 rounded-full 
+              hover:bg-[#1D4ED8] hover:text-white hover:cursor-pointer">
+            </i>
           </div>
         </section>
 
