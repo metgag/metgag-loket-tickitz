@@ -20,7 +20,7 @@ export default function Navbar() {
 
   return (
     <header
-      className="py-2 px-28 sticky top-0 border-[#DEDEDE] text-sm font-medium border-b bg-white z-9999">
+      className="py-2 px-6 md:px-28 sticky top-0 border-[#DEDEDE] text-sm font-medium border-b bg-white z-9999">
       <nav className="flex items-center justify-between relative">
         <div className="logo"><img src="/tickitz-blu.svg" alt="" />
         </div>
@@ -42,11 +42,15 @@ export default function Navbar() {
 
               return (
                 <>
-                  <div onClick={openMenu}
-                    className='bg-[url(/vite.svg)] border cursor-pointer rounded-full size-[2.25rem] hover:opacity-[.8]'>
-                  </div>
+                  <img onClick={openMenu}
+                    className='object-cover shadow-lg cursor-pointer rounded-full size-[2.25rem] hover:opacity-[.8]'
+                    src="/avenger-bg.png"
+                  >
+                  </img>
                   <div className={`manage-usr absolute ${menu} flex-col gap-2 top-10 bg-blue-300 p-1`}>
-                    <div className={menuStyle}>Preferences</div>
+                    <Link to="/profile">
+                      <div className={menuStyle}>Preferences</div>
+                    </Link>
                     <div className={menuStyle} onClick={handleLogout}>LogOut</div>
                   </div>
                   <div className="burger hidden">
@@ -57,13 +61,13 @@ export default function Navbar() {
                       <a className="decoration-none" href="index.html">Home</a>
                       <a className="decoration-none" href="home-dua.html">Movie</a>
                       <a className="decoration-none" href="../ticket/order.html">
-                      Buy Ticket</a>
+                        Buy Ticket</a>
                     </div>
                     <div className="profile d-flex flex-col">
                       <a className="decoration-none"
                         href="../sign/login.html">SignIn</a>
-                      <a className="decoration-none" href="../sign/register.html">Sign
-                        Up</a>
+                      <a className="decoration-none" href="../sign/register.html">
+                        Sign Up</a>
                     </div>
                   </div>
                 </>

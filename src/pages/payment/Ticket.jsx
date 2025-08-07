@@ -9,10 +9,13 @@ function Ticket() {
   ];
 
   return (
-    <main className="bg-[#ecedf2] flex items-center">
+    <main className="bg-[#ecedf2] flex flex-col md:flex-row items-center">
       <div
-        className="bg-[url(/avenger-bg.png)] h-[140vh] gap-[1.25rem] px-[10rem] justify-center w-[60%] text-white bg-center bg-zinc-800 bg-blend-overlay flex flex-col">
-        <img className="w-[14rem]" src="/tickitz-logo.png" alt="" />
+        className="bg-[url(/avenger-bg.png)] h-[80vh] md:h-[140vh] gap-[1.25rem] px-[10rem] 
+          justify-center md:w-[60%] text-white bg-center bg-zinc-800 
+          bg-blend-overlay flex flex-col text-center md:text-left"
+      >
+        <img className="w-[14rem] self-center md:self-start" src="/tickitz-logo.png" alt="" />
         <h1 className="text-5xl font-bold">Thankyou For Purchasing</h1>
         <p className="text-lg">
           Lorem ipsum dolor sit amet consectetur. Quam pretium pretium tempor integer sed magna et.
@@ -23,15 +26,18 @@ function Ticket() {
         </p>
         <i className="nf nf-fa-long_arrow_down hidden"></i>
       </div>
-      <aside className="h-full p-[4rem_0_2rem] mx-auto">
+      <aside className="h-full p-[4rem_0_2rem] w-[80%] md:w-max mx-auto">
         <div
           className="ticket-card flex flex-col relative p-[0_1.5rem_2rem] rounded-lg bg-white items-center">
           <img className="p-[2rem_0]" width="160" src="/qr.png" alt="" />
-          {["flex-end translate-x-34", "flex-start -translate-x-34"].map((item, i) => {
-            return <DotSide pos={item} i={i} />
-          })}
+          {["flex-end translate-x-76 md:translate-x-34",
+            "flex-start -translate-x-76 md:-translate-x-34"].map((item, i) => {
+              return <DotSide pos={item} i={i} />
+            })}
           <div
-            className="grid-detail border-t border-[#DEDEDE] pt-[3rem] grid grid-cols-2 gap-[1.25rem]">
+            className="grid-detail border-t w-full text-center md:text-left 
+              md:w-max border-[#DEDEDE] pt-[3rem] grid grid-cols-2 gap-[1.25rem]"
+          >
             {items.map((item, i) => {
               return <Item title={item.title} content={item.content} i={i} />
             })}

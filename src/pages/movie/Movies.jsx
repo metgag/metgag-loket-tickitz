@@ -6,10 +6,10 @@ export default function Movies() {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
   const [search, setSearch] = useState("");
-  const [searchParams, setSearchParams] = useSearchParams({ page: 1 });
-  const [urlMov, setUrlMov] = useState(
-    `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`
-  );
+  const [searchParams,] = useSearchParams({ page: 1 });
+  // const [urlMov, setUrlMov] = useState(
+  //   `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`
+  // );
 
   const apiToken = import.meta.env.VITE_API_TOKEN;
   const urlMovies = `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`;
@@ -61,14 +61,14 @@ export default function Movies() {
     <main className="flex flex-col">
       <div className="flex flex-col gap-12">
         <section id="hero-bg"
-          className="px-28 gap-6 mb-3 flex relative flex-col justify-center 
+          className="px-8 md:px-28 gap-6 mb-3 flex relative flex-col justify-center 
           bg-[url(/avenger-bg.png)] bg-blend-overlay bg-zinc-600 h-[56vh] 
           bg-cover w-screen bg-center"
         >
           <h4 className='text-white text-lg font-bold'>
             LIST MOVIE OF THE WEEK
           </h4>
-          <h1 className='text-white text-5xl w-156'>
+          <h1 className='text-white w-[80%] text-5xl md:w-156'>
             Experience the Magic of Cinema: Book Your Tickets Today
           </h1>
           <div id="pg-num" className="flex">
@@ -78,7 +78,7 @@ export default function Movies() {
           </div>
         </section>
 
-        <section id="event" className="flex px-28 gap-6">
+        <section id="event" className="flex px-8 md:px-28 gap-6">
           <form
             className='flex flex-col gap-4'>
             <label htmlFor="find" className='text-[#4E4B66] w-max'>
@@ -95,7 +95,7 @@ export default function Movies() {
           <div id="filter" className='flex flex-col gap-4'>
             <label htmlFor="" className='text-[#4E4B66]'>Filter</label>
             <div className='flex flex-wrap'>
-              {genres.map((genre) => {
+              {genres.splice(0, 7).map((genre) => {
                 return (
                   <button className='p-2 px-4 hover:bg-[#1D4ED8] 
                   hover:cursor-pointer hover:text-white rounded-xl'>
@@ -107,13 +107,18 @@ export default function Movies() {
           </div>
         </section>
 
-        <section id="watch-today" className="flex px-28 flex-col items-center">
-          <div className="movies-grid grid grid-cols-4 gap-8">
+        <section id="watch-today" className="flex px-8 md:px-28 flex-col items-center">
+          <div className="movies-grid grid grid-cols-2 md:grid-cols-4 gap-8">
             {movies.length > 0 &&
               movies
-                .filter((movie) => {
+                .filter(({ title }) => {
                   if (!search) return true;
-                  return movie.title.toLowerCase().includes(search.toLowerCase());
+                  return title.toLowerCase().includes(search.toLowerCase());
+                })
+                .sort(({ title: a }, { title: b }) => {
+                  if (a < b) return -1;
+                  if (a > b) return 1;
+                  return 0;
                 })
                 .map((movie) => {
                   return (
@@ -141,7 +146,7 @@ export default function Movies() {
                   )
                 })}
           </div>
-          <div id="pg-nav" className="flex items-center gap-4">
+          <div id="pg-nav" className="flex mt-6 items-center gap-4">
             {[1, 2, 3, 4].map((e, i) => {
               return <button key={i}
                 className="text-[#4E4B66] size-8 flex items-center 
@@ -159,7 +164,7 @@ export default function Movies() {
           </div>
         </section>
 
-        <Subscription mx={"mx-28"} />
+        <Subscription mx={"mx-8 md:mx-28"} />
       </div>
     </main>
   )

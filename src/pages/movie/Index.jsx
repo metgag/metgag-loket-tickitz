@@ -77,7 +77,7 @@ export default function Index() {
   }
 
   return (
-    <main className="flex flex-col md:px-28 gap-12">
+    <main className="flex px-6 flex-col md:px-28 gap-12">
       <section id="hero"
         className={`flex flex-col h-[88vh] md:flex-row ${rSect}`}>
         <div className="l-items flex flex-col gap-4 justify-center text-center md:text-left">
@@ -140,9 +140,9 @@ export default function Index() {
       </section>
 
       <section id="coming-soon"
-        className="flex flex-col gap-4 text-center md:items-start"
+        className="flex flex-col gap-4 md:items-start"
       >
-        <h4 className={hBlu}>UPCOMING MOVIES</h4>
+        <h4 className={`${hBlu} text-center`}>UPCOMING MOVIES</h4>
         <div className="soon flex items-center justify-between w-full">
           <h3 className={hBlk}>Exciting Movie Coming Soon</h3>
           <div onClick={handlePage}

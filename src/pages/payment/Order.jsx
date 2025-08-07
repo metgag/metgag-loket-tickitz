@@ -11,22 +11,12 @@ function Order() {
 
   console.log(detail)
 
-  const details = [
-    { head: "Movie Selected", content: "Spider-Man: Homecoming" },
-    { head: "Tuesday, 07 July 2020", content: "13:00pm" },
-    { head: "One ticket price", content: "$10" },
-    { head: "Seat choosed", content: "C4, C5, C6" },
-    { head: "Total Payment", content: "$30" },
-  ];
-  const orderSeats = [
-    { init: 1, end: 7, row: "A" },
-  ];
-  const legend = [
-    { id: "Available", bg: "#FCFDFE" },
-    { id: "Selected", bg: "#1D4ED8" },
-    { id: "Love nest", bg: "#F589D7" },
-    { id: "Sold", bg: "#6E7191" },
-  ];
+  // const legend = [
+  //   { id: "Available", bg: "#FCFDFE" },
+  //   { id: "Selected", bg: "#1D4ED8" },
+  //   { id: "Love nest", bg: "#F589D7" },
+  //   { id: "Sold", bg: "#6E7191" },
+  // ];
   const btnBlu = "btn-change h-min px-5 py-1 self-end rounded-md bg-[#1D4ED8] text-white font-medium hover:opacity-[.8] hover:cursor-pointer";
   const hBlk = "text-[#14142B] text-2xl font-semibold";
   const hLeft = "text-xl font-semibold";
@@ -64,11 +54,13 @@ function Order() {
   // }
 
   return (
-    <main className="bg-[#ECEDF2] py-20">
+    <main className="bg-[#ECEDF2] py-20 px-6 md:px-0">
       <div className="steps flex items-center justify-center">
       </div>
-      <div className="flex-container flex justify-center gap-4">
-        <div className="flex flex-col gap-6 bg-white p-4 py-6 rounded-lg">
+      <div className="flex-container flex flex-col justify-center gap-4
+          md:flex-row
+        ">
+        <div className="flex flex-col gap-6 bg-white p-6 md:p-4 py-6 rounded-lg">
           <div className="movie-detail flex border justify-between p-4 gap-4 border-[#DEDEDE] rounded-md">
             <img
               src={`${import.meta.env.VITE_POSTER_URL}${detail.backdrop_path}`}
@@ -137,7 +129,7 @@ function Order() {
           </div>
         </div>
         <aside className="flex flex-col h-min gap-8 min-w-md">
-          <div className="cinema bg-white flex p-4 py-6 flex-col gap-6 rounded-lg shadow-md">
+          <div className="cinema bg-white flex p-6 py-6 flex-col gap-6 rounded-lg shadow-md">
             <div className="cinema-name flex flex-col items-center gap-2">
               <img src="/sponsor/cine.svg" alt="" />
               <h3 className={`${hBlk}`}>

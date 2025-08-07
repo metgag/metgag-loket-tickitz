@@ -3,7 +3,7 @@ function Subscription(props) {
     <section id="newsletter"
       className={`bg-[#2563EB] ${props.mx} flex flex-col items-center rounded-3xl px-12 py-20 gap-8`}>
       <h1 className="text-5xl text-white">Subscribe to our newsletter</h1>
-      <form className="flex gap-3 flex-col w-full  md:flex-row md:justify-center" action="">
+      <form className="flex gap-3 flex-col w-full md:flex-row md:justify-center" action="">
         <Input type={"text"} pder={"First name"} />
         <Input type={"email"} pder={"Email address"} />
         <button

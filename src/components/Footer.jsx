@@ -1,6 +1,6 @@
 export default function Footer() {
-  const hStyle = "font-bold mb-6";
-  const itmStyle = "flex flex-col gap-3";
+  const hStyle = "font-bold mt-8 mb-2 md:mb-6 md:mt-0";
+  const itmStyle = "flex md:flex-col gap-3";
   const explores = [
     "Cinemas", "Movies List", "My Ticket", "Notification"
   ];
@@ -12,9 +12,9 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="flex px-28 flex-col py-8 mt-16">
-      <div className="top flex justify-between">
-        <div className="foo-logo">
+    <footer className="flex px-8 md:px-28 flex-col py-8 mt-16">
+      <div className="top flex justify-between md:flex-row flex-col">
+        <div className="foo-logo md:block">
           <img src="/tickitz-blu.svg"
             className='mb-6' />
           <p className='text-[#6E7191]'>Stop waiting in line. Buy tickets

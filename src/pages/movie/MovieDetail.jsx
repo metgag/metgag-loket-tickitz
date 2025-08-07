@@ -18,9 +18,9 @@ function MovieDetail() {
   const hGray = "text-md text-[#8692A6]";
   const tBlk = "text-md text-[#121212]";
   const selGray = "bg-[#EFF0F6] rounded-md p-3 px-4 text-[#4E4B66]";
-  const btnBlu = "bg-[#1D4ED8] text-white rounded-sm hover:opacity-[.7] hover:cursor-pointer";
+  const btnBlu = "bg-[#1D4ED8] py-3 text-white rounded-sm hover:opacity-[.7] hover:cursor-pointer";
   const pgStyle = "border border-[#DEDEDE] text-[#4E4B66] size-8 flex items-center justify-center rounded-sm hover:bg-[#1D4ED8] hover:text-white hover:border-none hover:cursor-pointer hover:[#FFFFFF]";
-  const cinemaStyle = "grid place-content-center border-2 border-[#DEDEDE] rounded-md py-8 hover:border-none hover:bg-[#1D4ED8] hover:cursor-pointer";
+  const cinemaStyle = "grid place-content-center border-2 border-[#DEDEDE] rounded-md py-8 hover:border-[#1D4ED8] hover:cursor-pointer";
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_DETAIL_URL}${movieId}`, options)
@@ -75,18 +75,21 @@ function MovieDetail() {
   return (
     <main className="flex flex-col relative gap-12">
       <img
-        className="w-screen h-94 rounded-b-2xl object-cover object-[0_-6rem] absolute"
+        className="w-screen h-128 md:h-94 rounded-b-2xl object-cover object-[0_-6rem] absolute"
         src={`${import.meta.env.VITE_POSTER_URL}${detail.backdrop_path}`}
       />
 
-      <section className="mov-detail relative top-[13rem] mb-[13rem] px-28 flex flex-col gap-6">
-        <div className="detail-wrapper flex gap-4">
+      <section className="mov-detail relative px-6 top-28 md:top-[13rem] mb-[13rem] md:px-28 flex flex-col gap-6">
+        <div
+          className="detail-wrapper flex gap-4 flex-col items-center justify-center
+            md:flex-row md:items-start md:justify-start
+        ">
           <img
-            className="h-80 rounded-lg"
+            className="md:h-80 rounded-lg"
             src={`${import.meta.env.VITE_POSTER_URL}${detail.poster_path}`}
             alt=""
           />
-          <div className="right-items self-end flex flex-col gap-4">
+          <div className="right-items items-center md:items-start md:self-end flex flex-col gap-4">
             <h2 className="text-3xl font-semibold">{detail.title}</h2>
             <div className="genre flex gap-2">
               {genres.map((genre) => {
@@ -111,18 +114,18 @@ function MovieDetail() {
             </div>
           </div>
         </div>
-        <div className="synopsis-wrapper w-[70%] col-span-3">
+        <div className="synopsis-wrapper md:w-[70%] col-span-3">
           <h3 className="font-semibold text-lg">Synopsis</h3>
           <p className="text-[#A0A3BD]">{detail.overview}</p>
         </div>
       </section>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6 px-28">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 px-6 md:px-28">
         <h2 className="text-2xl text-[#121212]">Book Tickets</h2>
-        <div className="grid-cont grid grid-cols-4 gap-4">
-          <h4 className="font-semibold">Choose Date</h4>
-          <h4 className="font-semibold">Choose Time</h4>
-          <h4 className="font-semibold col-span-2">Choose Location</h4>
+        <div className="grid-cont grid md:grid-cols-4 gap-4">
+          <h4 className="hidden md:block font-semibold">Choose Date</h4>
+          <h4 className="hidden md:block font-semibold">Choose Time</h4>
+          <h4 className="hidden md:block font-semibold col-span-2">Choose Location</h4>
           <select name="date" className={selGray}>
             <option value="14/07/20">14/07/20</option>
             <option value="21/07/20">21/07/20</option>
@@ -145,7 +148,7 @@ function MovieDetail() {
             <h4 className="font-semibold">Choose Cinema</h4>
             <h4 className="text-[#8692A6] font-bold">39 Result</h4>
           </div>
-          <div className="cinema-icon grid grid-cols-4 gap-4">
+          <div className="cinema-icon grid grid-cols-2 md:grid-cols-4 gap-4">
             <div id="cinema-1" className={cinemaStyle}>
               <img src="/sponsor/ebv.png" alt="" />
             </div>
