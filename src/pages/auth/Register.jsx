@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import Step from '../../components/Step'
 
 export default function Register() {
+  const [eye, setEye] = useState("nf-fa-eye");
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
@@ -14,10 +15,14 @@ export default function Register() {
     { how: "Done", bg: "#A0A3BD", color: "#A0A3BD" },
   ];
 
-  function handleVpwd(e) {
+  function handleVpwd() {
     setVpwd(() => {
-      if (vpwd === "password") return "text";
-      else return "password";
+      if (vpwd === "password") {
+        setEye("nf-fa-eye_slash");
+        return "text";
+      }
+      setEye("nf-fa-eye");
+      return "password";
     });
   }
 
@@ -106,7 +111,7 @@ export default function Register() {
               <div className="pwd relative flex items-end">
                 <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="pwd" id="pwd"
                   placeholder="Enter your password" />
-                <i onClick={handleVpwd} className="nf nf-fa-eye absolute right-0 pe-[.875rem] translate-y-[-120%] hover:cursor-pointer hover:opacity-[.6]"></i>
+                <i onClick={handleVpwd} className={`nf ${eye} absolute right-0 pe-[.875rem] translate-y-[-120%] hover:cursor-pointer hover:opacity-[.6]`}></i>
               </div>
               <p id="errpwd" className="text-red-800 text-xs font-semibold">{pwdErr}</p>
             </div>
