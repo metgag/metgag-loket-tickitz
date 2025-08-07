@@ -47,9 +47,6 @@ function MovieDetail() {
   function handleSubmit(e) {
     e.preventDefault();
     let result = {};
-    let genre = {
-      movGenres: genres
-    };
 
     for (let i = 0; i < 3; i++) {
       Object.assign(result, {
