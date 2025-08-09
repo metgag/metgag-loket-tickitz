@@ -9,6 +9,7 @@ import Footer from './components/Footer.jsx'
 import Order from './pages/payment/Order.jsx'
 import Payment from './pages/payment/Payment.jsx'
 import Ticket from './pages/payment/Ticket.jsx'
+import Profile from './pages/profile/Profile.jsx'
 
 function Router() {
   return (
@@ -34,6 +35,10 @@ function Router() {
           <Route path="detail/:movieId" element={<MovieDetail />} />
           <Route path="ticket" element={<Ticket />} />
         </Route>
+
+        <Route path="profile" element={<ProfileLayout />}>
+          <Route index element={<Profile />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
@@ -45,6 +50,15 @@ function RouteLayout() {
       <Navbar />
       <Outlet />
       <Footer />
+    </>
+  )
+}
+
+function ProfileLayout() {
+  return (
+    <>
+      <Navbar />
+      <Outlet />
     </>
   )
 }
