@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 
 export default function Navbar() {
+  const [vMenu, setVMenu] = useState(false);
   const [menu, setMenu] = useState("hidden");
 
   const authStyle = "p-2 px-3 rounded-md hover:opacity-[.8]";
-  const menuStyle = "cursor-pointer font-medium hover:underline";
+  const menuStyle = "cursor-pointer";
   const pages = [
     { to: "/", page: "Home" },
     { to: "/movie/list", page: "Movie" },
@@ -24,9 +25,9 @@ export default function Navbar() {
       <nav className="flex items-center justify-between relative">
         <div className="logo"><img src="/tickitz-blu.svg" alt="" />
         </div>
-        <div className="center flex gap-6">
+        <div className="center gap-6 hidden md:flex">
           {pages.map((page, i) => {
-            return <ListItem i={i} to={page.to} page={page.page} />
+            return <ListItem key={i} to={page.to} page={page.page} />
           })}
         </div>
         <div className="account relative flex gap-3">
@@ -39,38 +40,50 @@ export default function Navbar() {
                   setMenu("hidden");
                 }
               }
-
               return (
-                <>
+                <div
+                  className='flex items-center gap-4'
+                >
                   <img onClick={openMenu}
-                    className='object-cover shadow-lg cursor-pointer rounded-full size-[2.25rem] hover:opacity-[.8]'
-                    src="/avenger-bg.png"
+                    className='object-cover shadow-lg cursor-pointer
+                    rounded-full size-[2.25rem] hover:opacity-[.8]'
+                    src="/vite.svg"
                   >
                   </img>
-                  <div className={`manage-usr absolute ${menu} flex-col gap-2 top-10 bg-blue-300 p-1`}>
+                  <div
+                    className={`manage-usr absolute ${menu} flex-col top-11 
+                      border-b border-[#DEDEDE] right-8 md:right-0
+                      bg-white`}>
                     <Link to="/profile">
-                      <div className={menuStyle}>Preferences</div>
+                      <div className={`${menuStyle} border-[#DEDEDE] border-b`}>
+                        Preferences
+                      </div>
                     </Link>
                     <div className={menuStyle} onClick={handleLogout}>LogOut</div>
                   </div>
-                  <div className="burger hidden">
+                  <div className={`burger md:hidden ${menuStyle}
+                    text-lg hover:opacity-40`}
+                    onClick={() => setVMenu(!vMenu)}
+                  >
                     <i className="nf nf-md-menu"></i>
                   </div>
-                  <div className="menu d-flex flex-col hidden">
-                    <div className="page d-flex flex-col">
-                      <a className="decoration-none" href="index.html">Home</a>
-                      <a className="decoration-none" href="home-dua.html">Movie</a>
-                      <a className="decoration-none" href="../ticket/order.html">
-                        Buy Ticket</a>
+                  {vMenu &&
+                    <div
+                      className='flex flex-col absolute text-right top-11 bg-white
+                      w-max'
+                    >
+                      {pages.map((e, i) => {
+                        return (
+                          <Link to={e.to} key={i}
+                            className='border-b border-[#DEDEDE]'
+                          >
+                            {e.page}
+                          </Link>
+                        )
+                      })}
                     </div>
-                    <div className="profile d-flex flex-col">
-                      <a className="decoration-none"
-                        href="../sign/login.html">SignIn</a>
-                      <a className="decoration-none" href="../sign/register.html">
-                        Sign Up</a>
-                    </div>
-                  </div>
-                </>
+                  }
+                </div>
               )
             } else {
               return (
@@ -90,9 +103,8 @@ export default function Navbar() {
             }
           })()}
         </div>
-        <div className="burger hidden"><i className="nf nf-md-menu"></i></div>
       </nav>
-    </header>
+    </header >
   );
 }
 
@@ -103,7 +115,7 @@ export default function Navbar() {
 function ListItem(props) {
   return (
     <Link key={props.i} to={`${props.to}`}
-      className="text-[#0F172A] hover:font-semibold hover:text-blue-900">
+      className="text-[#0F172A] font-semibold hover:text-blue-900">
       {props.page}
     </Link >
   );
