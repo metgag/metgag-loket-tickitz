@@ -1,17 +1,25 @@
 import { Fragment, useState } from 'react'
-import userAvail from '../../utils/userAvail.js'
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router';
+import { addUser } from '../../redux/slices/currUserSlice';
 
 export default function Login() {
+  const users = useSelector((state) => state.auth.users);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
+  const [eye, setEye] = useState("nf-fa-eye");
 
-  userAvail();
-
-  function handleVpwd(e) {
+  function handleVpwd() {
     setVpwd(() => {
-      if (vpwd === "password") return "text";
-      else return "password";
+      if (vpwd === "password") {
+        setEye("nf-fa-eye_slash");
+        return "text";
+      }
+      setEye("nf-fa-eye");
+      return "password";
     });
   }
 
@@ -19,45 +27,24 @@ export default function Login() {
     e.preventDefault();
     // destructure Array
     const [email, pwd] = e.target;
-    let [isEmail, isPwd] = [false, false];
 
-    // Validasi Email
-    // field email tidak boleh kosong
-    if (email.value === null || email.value === "") {
-      setEmailErr(() => "Field email tidak boleh kosong");
+    const emailIdx = users.findIndex((user) => {
+      return user.email === email.value;
+    });
+
+    if (emailIdx === -1) {
+      setEmailErr("Email tidak terdaftar")
+      setPwdErr(null);
     } else {
-      // validasi format email
-      const reMail = /^[\w-.]+@[a-z]{5,}.com$/;
-      if (!reMail.test(email.value)) {
-        setEmailErr(() => "Format email tidak sesuai");
-      } else {
-        setEmailErr("");
-        isEmail = true;
-      }
-    }
+      setEmailErr(null);
 
-    // Validasi Password
-    // field password tidak boleh kosong
-    if (pwd.value === null || pwd.value === "") {
-      setPwdErr("Field password tidak boleh kosong");
-    } else {
-      // validasi minimal 8 karakter
-      if (pwd.value.length < 8) {
-        setPwdErr("Password minimal 8 karakter");
+      if (users[emailIdx].pwd !== pwd.value) {
+        setPwdErr("Password tidak cocok");
       } else {
-        // validasi format
-        const rePwd = /^(?=.*[a-z])(?=.+[A-Z])(?=.+[!@#$%^&*/><]).{8,}$/;
-        if (!rePwd.test(pwd.value)) {
-          setPwdErr("Password harus terdiri dari minimal 1 huruf besar dan kecil, dan 1 buah karakter spesial(!@#$%^&*/><)");
-        } else {
-          setPwdErr("");
-          isPwd = true;
-        }
+        setPwdErr(null);
+        dispatch(addUser(users[emailIdx]));
+        navigate('/');
       }
-    }
-
-    if (isEmail && isPwd) {
-      console.log("Login berhasil");
     }
   }
 
@@ -87,12 +74,21 @@ export default function Login() {
               <div className="pwd relative flex items-end">
                 <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="" id="pwd"
                   placeholder="Enter your password" />
-                <i onClick={handleVpwd} className="nf nf-fa-eye absolute right-0 pe-[.875rem] translate-y-[-120%] hover:cursor-pointer hover:opacity-[.6]"></i>
+                <i onClick={handleVpwd}
+                  className={`nf ${eye} absolute right-0 pe-[.875rem] 
+                translate-y-[-120%] hover:cursor-pointer hover:opacity-[.6]`}></i>
               </div>
               <p id="errpwd" className="text-red-800 text-xs">{pwdErr}</p>
             </div>
-            <a className="text-[#1D4ED8] text-end hover:opacity-[.6] cursor-pointer">Forgot your password?</a>
-            <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer" type="submit">
+            <Link className="text-[#1D4ED8] text-end 
+              cursor-pointer underline"
+              to='/auth/register'
+            >
+              Sign Up
+            </Link>
+            <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] 
+            py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer"
+              type="submit">
               Login
             </button>
             <div id="or" className="flex justify-center">
