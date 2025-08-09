@@ -1,7 +1,12 @@
 import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router'
+import { removeCurrUser } from '../redux/slices/currUserSlice';
+import { removeUser } from '../redux/slices/authSlice';
 
 export default function Navbar() {
+  const currUser = useSelector((state) => state.currUser.currUser);
+  const dispatch = useDispatch();
   const [vMenu, setVMenu] = useState(false);
   const [menu, setMenu] = useState("hidden");
 
@@ -14,16 +19,27 @@ export default function Navbar() {
   ];
 
   function handleLogout() {
-    window.localStorage.clear();
-    console.log("logOut success");
-    window.location.reload();
+    dispatch(removeCurrUser());
+    dispatch(removeUser(currUser));
+    // window.localStorage.clear();
+    // console.log("logOut success");
+    // window.location.reload();
   }
 
   return (
     <header
-      className="py-2 px-6 md:px-28 sticky top-0 border-[#DEDEDE] text-sm font-medium border-b bg-white z-9999">
+      className="py-2 px-6 md:px-28 sticky top-0 border-[#DEDEDE] text-sm 
+        font-medium border-b bg-white z-9999">
       <nav className="flex items-center justify-between relative">
-        <div className="logo"><img src="/tickitz-blu.svg" alt="" />
+        <div className="logo flex items-center relative gap-2">
+          <img src="/tickitz-blu.svg" alt=""
+            className=''
+          />
+          {currUser.email !== null &&
+            <p
+              className='text-[#A0A3BD] inset-0 top-3/4 absolute text-sm'
+            >Hello, {currUser.email.split('@')[0]}</p>
+          }
         </div>
         <div className="center gap-6 hidden md:flex">
           {pages.map((page, i) => {
@@ -32,7 +48,7 @@ export default function Navbar() {
         </div>
         <div className="account relative flex gap-3">
           {(() => {
-            if (localStorage.getItem("user")) {
+            if (currUser.email !== null) {
               function openMenu() {
                 if (menu === "hidden") {
                   setMenu("flex");
@@ -59,7 +75,9 @@ export default function Navbar() {
                         Preferences
                       </div>
                     </Link>
-                    <div className={menuStyle} onClick={handleLogout}>LogOut</div>
+                    <div
+                      className={menuStyle}
+                      onClick={handleLogout}>LogOut</div>
                   </div>
                   <div className={`burger md:hidden ${menuStyle}
                     text-lg hover:opacity-40`}
@@ -87,18 +105,43 @@ export default function Navbar() {
               )
             } else {
               return (
-                <>
-                  <Link
-                    className={`${authStyle} border border-[#1D4ED8] text-[#1D4ED8]`}
-                    to="/auth/login">
-                    SignIn
-                  </Link>
-                  <Link
-                    className={`${authStyle} bg-[#1D4ED8] text-white`}
-                    to="/auth/register">
-                    Sign Up
-                  </Link>
-                </>
+                <div
+                  className='flex items-center justify-end gap-2 relative'>
+                  <div>
+                    <Link
+                      className={`${authStyle} border border-[#1D4ED8] text-[#1D4ED8]`}
+                      to="/auth/login">
+                      SignIn
+                    </Link>
+                    <Link
+                      className={`${authStyle} bg-[#1D4ED8] text-white`}
+                      to="/auth/register">
+                      Sign Up
+                    </Link>
+                  </div>
+                  <div className={`burger md:hidden ${menuStyle}
+                    text-lg hover:opacity-40`}
+                    onClick={() => setVMenu(!vMenu)}
+                  >
+                    <i className="nf nf-md-menu"></i>
+                  </div>
+                  {vMenu &&
+                    <div
+                      className='flex flex-col absolute text-right top-11 bg-white
+                      w-max'
+                    >
+                      {pages.map((e, i) => {
+                        return (
+                          <Link to={e.to} key={i}
+                            className='border-b border-[#DEDEDE]'
+                          >
+                            {e.page}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  }
+                </div>
               )
             }
           })()}
