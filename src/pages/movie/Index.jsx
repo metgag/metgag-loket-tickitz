@@ -116,7 +116,7 @@ export default function Index() {
         </h3>
         <div id="point" className="flex flex-col gap-8 md:flex-row">
           {whyChoose.map((choose, i) => {
-            return <ChooseItem i={i} title={choose.title} img={choose.img} />
+            return <ChooseItem key={i} title={choose.title} img={choose.img} />
           })}
         </div>
       </section>
@@ -128,7 +128,7 @@ export default function Index() {
         </h3>
         <div className="movies flex gap-4 px">
           {movies.slice(0, 4).map((movie, i) => {
-            return <MovieCard i={i} title={movie.title}
+            return <MovieCard key={i} title={movie.title}
               poster={movie.poster_path} genres={movie.genres} />
           })}
         </div>
@@ -153,7 +153,7 @@ export default function Index() {
         </div>
         <div className="movies flex gap-4 self-center">
           {movies.slice(sliceLen[0], sliceLen[1]).map((movie, i) => {
-            return <MovieCard i={i} title={movie.title}
+            return <MovieCard key={i} title={movie.title}
               poster={movie.poster_path} genres={movie.genres}
               release={movie.fDate} />
           })}

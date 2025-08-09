@@ -24,7 +24,7 @@ export default function Footer() {
           <h4 className={hStyle}>Explore</h4>
           <div className={itmStyle}>
             {explores.map((exp, i) => {
-              return <Explore i={i} ename={exp} />
+              return <Explore key={i} ename={exp} />
             })}
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function Footer() {
           <h4 className={hStyle}>Follow us</h4>
           <div className={itmStyle}>
             {socials.map((social, i) => {
-              return <SocialLink i={i} sname={social.sname} ico={social.ico} />
+              return <SocialLink key={i} sname={social.sname} ico={social.ico} />
             })}
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function Footer() {
 }
 
 function Explore(props) {
-  return <p key={props.i} className="text-[#4E4B66]">{props.ename}</p>;
+  return <p className="text-[#4E4B66]">{props.ename}</p>;
 }
 
 function SocialLink(props) {
