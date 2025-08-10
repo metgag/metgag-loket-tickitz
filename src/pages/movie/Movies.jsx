@@ -1,56 +1,64 @@
-import { Fragment, useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Fragment, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import Subscription from '../../components/Subscription'
+import { useSelector } from 'react-redux';
+// import { movieActions } from '../../redux/slices/movieSlice';
 
 export default function Movies() {
-  const [movies, setMovies] = useState([]);
-  const [genres, setGenres] = useState([]);
+  const movieState = useSelector((state) => state.movies.movies);
+  // const genres = useSelector((state) => state.movies.movies.genreList);
+  const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   dispatch(movieActions.getMoviesThunk());
+  // }, [dispatch]);
+
+  // const [movies, setMovies] = useState([]);
+  // const [genres, setGenres] = useState([]);
   const [search, setSearch] = useState("");
-  const [searchParams,] = useSearchParams({ page: 1 });
-  // const [urlMov, setUrlMov] = useState(
-  //   `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`
-  // );
+  // const [searchParams,] = useSearchParams({ page: 1 });
+  const { movies } = movieState;
 
-  const apiToken = import.meta.env.VITE_API_TOKEN;
-  const urlMovies = `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`;
-  const urlGenres = import.meta.env.VITE_GENRES_URL;
-  const options = {
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-      Authorization: `Bearer ${apiToken}`
-    }
-  };
+  // const apiToken = import.meta.env.VITE_API_TOKEN;
+  // const urlMovies = `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`;
+  // const urlGenres = import.meta.env.VITE_GENRES_URL;
+  // const options = {
+  //   method: 'GET',
+  //   headers: {
+  //     accept: 'application/json',
+  //     Authorization: `Bearer ${apiToken}`
+  //   }
+  // };
 
-  useEffect(() => {
-    (async () => {
-      const promises = [fetch(urlMovies, options), fetch(urlGenres, options)];
-      const [moviesResp, genresResp] = await Promise.all(promises);
-      const { results: movieResults } = await moviesResp.json();
-      const { genres } = await genresResp.json();
-      const genresMap = new Map();
-      genres.forEach((genre) => {
-        genresMap.set(genre.id, genre.name);
-      });
+  // useEffect(() => {
+  //   (async () => {
+  //     const promises = [fetch(urlMovies, options), fetch(urlGenres, options)];
+  //     const [moviesResp, genresResp] = await Promise.all(promises);
+  //     const { results: movieResults } = await moviesResp.json();
+  //     const { genres } = await genresResp.json();
+  //     const genresMap = new Map();
+  //     genres.forEach((genre) => {
+  //       genresMap.set(genre.id, genre.name);
+  //     });
 
-      const movies = movieResults.map((movie) => {
-        const { id, title, genre_ids, poster_path } = movie;
-        const result = {
-          id,
-          title,
-          poster_path,
-        };
-        const genres = genre_ids.map((genreId) => {
-          return genresMap.get(genreId);
-        });
-        Object.assign(result, { genres });
-        return result;
-      });
+  //     const movies = movieResults.map((movie) => {
+  //       const { id, title, genre_ids, poster_path } = movie;
+  //       const result = {
+  //         id,
+  //         title,
+  //         poster_path,
+  //       };
+  //       const genres = genre_ids.map((genreId) => {
+  //         return genresMap.get(genreId);
+  //       });
+  //       Object.assign(result, { genres });
+  //       return result;
+  //     });
 
-      setMovies(movies);
-      setGenres(genres);
-    })();
-  }, [searchParams]);
+  //     setMovies(movies);
+  //     setGenres(genres);
+  //   })();
+  // }, [searchParams]);
 
   function handleSearch(e) {
     const input = (e.target.value);
@@ -95,14 +103,14 @@ export default function Movies() {
           <div id="filter" className='flex flex-col gap-4'>
             <label htmlFor="" className='text-[#4E4B66]'>Filter</label>
             <div className='flex flex-wrap'>
-              {genres.splice(0, 7).map((genre) => {
+              {/* {genres.splice(0, 7).map((genre) => {
                 return (
                   <button className='p-2 px-4 hover:bg-[#1D4ED8] 
                   hover:cursor-pointer hover:text-white rounded-xl'>
                     {genre.name}
                   </button>
                 )
-              })}
+              })} */}
             </div>
           </div>
         </section>
@@ -124,13 +132,14 @@ export default function Movies() {
                   return (
                     <div key={movie.id} className={`thumbnail-${movie.id} 
                   flex flex-col gap-3`}>
-                      <Link to={`/movie/detail/${movie.id}`}>
-                        <img className="hover:opacity-[.8] hover:cursor-pointer 
-                    rounded-md"
-                          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                          alt=""
-                        />
-                      </Link>
+                      <img
+                        onClick={() => {
+                          navigate(`/movie/detail/${movie.id}`);
+                        }}
+                        className="hover:opacity-[.8] hover:cursor-pointer rounded-md"
+                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                        alt=""
+                      />
                       <h4 className='text-[#14142B] font-bold text-lg'>
                         {movie.title}
                       </h4>
