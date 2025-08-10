@@ -1,4 +1,9 @@
+// import { useSelector } from "react-redux"
+
 function Preferences() {
+  // const user = useSelector((state) => state.currUser.currUser);
+  const whoami = JSON.parse(localStorage.getItem('whoami'));
+
   return (
     <>
       <div
@@ -25,12 +30,12 @@ function Preferences() {
             <label className="text-sm text-[#4E4B66]" htmlFor="">E-mail</label>
             <input
               className="rounded-lg text-[#4E4B66] p-[.75rem] border border-[#DEDEDE]"
-              type="email" name="" id="" />
+              type="email" name="" id="" defaultValue={whoami.email} />
           </div>
           <div className="detail flex flex-col gap-[.75rem] detail-4">
             <label className="text-sm text-[#4E4B66]" htmlFor="">
               Phone Number
-              </label>
+            </label>
             <input
               className="rounded-lg text-[#4E4B66] p-[.75rem] border border-[#DEDEDE]"
               type="text" />
