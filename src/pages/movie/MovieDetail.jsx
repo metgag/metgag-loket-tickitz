@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate, useParams } from "react-router"
 import { format } from 'date-fns'
+import { getDetail } from "../../redux/slices/detailSlice"
+import { useDispatch } from "react-redux"
 
 function MovieDetail() {
+  const dispatch = useDispatch();
   const { movieId } = useParams();
   const [detail, setDetail] = useState({});
   const [genres, setGenres] = useState([]);
@@ -22,27 +25,25 @@ function MovieDetail() {
   const pgStyle = "border border-[#DEDEDE] text-[#4E4B66] size-8 flex items-center justify-center rounded-sm hover:bg-[#1D4ED8] hover:text-white hover:border-none hover:cursor-pointer hover:[#FFFFFF]";
   const cinemaStyle = "grid place-content-center border-2 border-[#DEDEDE] rounded-md py-8 hover:border-[#1D4ED8] hover:cursor-pointer";
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_DETAIL_URL}${movieId}`, options)
-      .then(res => res.json())
-      .then(res => {
-        // console.log(res);
-        const { runtime, title, release_date, overview, genres, backdrop_path, poster_path } = res;
-        const fDate = format(new Date(release_date), "MMMM dd, yyyy");
-        const result = {
-          title,
-          fDate,
-          overview,
-          backdrop_path,
-          poster_path,
-          runtime
-        };
+  fetch(`${import.meta.env.VITE_DETAIL_URL}${movieId}`, options)
+    .then(res => res.json())
+    .then(res => {
+      // console.log(res);
+      const { runtime, title, release_date, overview, genres, backdrop_path, poster_path } = res;
+      const fDate = format(new Date(release_date), "MMMM dd, yyyy");
+      const result = {
+        title,
+        fDate,
+        overview,
+        backdrop_path,
+        poster_path,
+        runtime
+      };
 
-        setDetail(result);
-        setGenres(genres);
-      })
-      .catch(err => console.error(err));
-  }, []);
+      setDetail(result);
+      setGenres(genres);
+    })
+    .catch(err => console.error(err));
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -54,19 +55,23 @@ function MovieDetail() {
       });
     }
 
-    if (Object.keys(result).length > 0) {
-      setDetail((set) => {
-        return Object.assign(set, result);
-      });
+    dispatch(getDetail({ detail, result }));
+    // console.log(detailState.result);
+    // console.log(detailState.detail);
 
-      if (localStorage.getItem("detail")) {
-        localStorage.removeItem("detail");
-      }
+    // if (Object.keys(result).length > 0) {
+    //   setDetail((set) => {
+    //     return Object.assign(set, result);
+    //   });
 
-      localStorage.setItem("detail", JSON.stringify(detail));
-      // console.log(detail)
-      navigate("/movie/order")
-    }
+    //   if (localStorage.getItem("detail")) {
+    //     localStorage.removeItem("detail");
+    //   }
+
+    //   localStorage.setItem("detail", JSON.stringify(detail));
+    //   // console.log(detail)
+    navigate("/movie/order")
+    // }
   }
 
   return (
