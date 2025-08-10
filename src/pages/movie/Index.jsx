@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import MovieCard from '../../components/MovieCard.jsx'
 import ChooseItem from '../../components/ChooseItem.jsx'
 import Subscription from '../../components/Subscription.jsx'
 import { format } from 'date-fns'
+import { useSelector } from 'react-redux'
 
 export default function Index() {
-  const [movies, setMovies] = useState([]);
+  const movieState = useSelector((state) => state.movies.movies);
   const [sliceLen, setSliceLen] = useState([0, 4]);
+  // const [movies, setMovies] = useState([]);
 
+  const { movies } = movieState;
   const whyChoose = [
     { title: "Guaranteed", img: "/icon/shield-done.svg" },
     { title: "Affordable", img: "/icon/check-circle.svg" },
@@ -20,47 +23,47 @@ export default function Index() {
     text-white`;
   const rSect = "text-center items-center md:text-left";
 
-  const apiToken = import.meta.env.VITE_API_TOKEN;
-  const urlMovies = import.meta.env.VITE_MOVIES_URL;
-  const urlGenres = import.meta.env.VITE_GENRES_URL;
-  const options = {
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-      Authorization: `Bearer ${apiToken}`
-    }
-  };
+  // const apiToken = import.meta.env.VITE_API_TOKEN;
+  // const urlMovies = import.meta.env.VITE_MOVIES_URL;
+  // const urlGenres = import.meta.env.VITE_GENRES_URL;
+  // const options = {
+  //   method: 'GET',
+  //   headers: {
+  //     accept: 'application/json',
+  //     Authorization: `Bearer ${apiToken}`
+  //   }
+  // };
 
-  useEffect(() => {
-    (async () => {
-      const promises = [fetch(urlMovies, options), fetch(urlGenres, options)];
-      const [moviesResp, genresResp] = await Promise.all(promises);
-      const { results: movieResults } = await moviesResp.json();
-      const { genres } = await genresResp.json();
-      const genresMap = new Map();
-      genres.forEach((genre) => {
-        genresMap.set(genre.id, genre.name);
-      });
+  // useEffect(() => {
+  //   (async () => {
+  //     const promises = [fetch(urlMovies, options), fetch(urlGenres, options)];
+  //     const [moviesResp, genresResp] = await Promise.all(promises);
+  //     const { results: movieResults } = await moviesResp.json();
+  //     const { genres } = await genresResp.json();
+  //     const genresMap = new Map();
+  //     genres.forEach((genre) => {
+  //       genresMap.set(genre.id, genre.name);
+  //     });
 
-      const movies = movieResults.map((movie) => {
-        const { id, title, release_date, genre_ids, poster_path } = movie;
-        const fDate = format(new Date(release_date), "MMMM yyyy");
-        const result = {
-          id,
-          title,
-          poster_path,
-          fDate
-        };
-        const genres = genre_ids.map((genreId) => {
-          return genresMap.get(genreId);
-        });
-        Object.assign(result, { genres });
-        return result;
-      });
+  //     const movies = movieResults.map((movie) => {
+  //       const { id, title, release_date, genre_ids, poster_path } = movie;
+  //       const fDate = format(new Date(release_date), "MMMM yyyy");
+  //       const result = {
+  //         id,
+  //         title,
+  //         poster_path,
+  //         fDate
+  //       };
+  //       const genres = genre_ids.map((genreId) => {
+  //         return genresMap.get(genreId);
+  //       });
+  //       Object.assign(result, { genres });
+  //       return result;
+  //     });
 
-      setMovies(movies);
-    })();
-  }, []);
+  //     setMovies(movies);
+  //   })();
+  // }, []);
 
   function handlePage(e) {
     if (e.target.className.includes("right")) {
@@ -155,7 +158,7 @@ export default function Index() {
           {movies.slice(sliceLen[0], sliceLen[1]).map((movie, i) => {
             return <MovieCard key={i} title={movie.title}
               poster={movie.poster_path} genres={movie.genres}
-              release={movie.fDate} />
+              release={format(new Date(movie.release_date), "MMMM yyyy")} />
           })}
         </div>
       </section>
