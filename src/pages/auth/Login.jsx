@@ -1,16 +1,21 @@
 import { Fragment, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
-import { addUser } from '../../redux/slices/currUserSlice';
+// import { addUser } from '../../redux/slices/currUserSlice';
+import useLocalStorage from '../../hooks/useLocalStorage';
 
 export default function Login() {
   const users = useSelector((state) => state.auth.users);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const navigate = useNavigate();
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
   const [eye, setEye] = useState("nf-fa-eye");
+  const [_,setCurr] = useLocalStorage(
+    "whoami",
+    null
+  );
 
   function handleVpwd() {
     setVpwd(() => {
@@ -27,7 +32,7 @@ export default function Login() {
     e.preventDefault();
     // destructure Array
     const [email, pwd] = e.target;
-
+    
     const emailIdx = users.findIndex((user) => {
       return user.email === email.value;
     });
@@ -37,12 +42,16 @@ export default function Login() {
       setPwdErr(null);
     } else {
       setEmailErr(null);
-
+      
       if (users[emailIdx].pwd !== pwd.value) {
         setPwdErr("Password tidak cocok");
       } else {
         setPwdErr(null);
-        dispatch(addUser(users[emailIdx]));
+        // dispatch(addUser(users[emailIdx]));
+        setCurr({
+          email: email.value,
+          pwd: pwd.value
+        });
         navigate('/');
       }
     }
