@@ -1,8 +1,9 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import Step from '../../components/Step'
 import { addUser } from '../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
+import { fetchMovie } from '../../redux/slices/movieSlice'
 
 export default function Register() {
   const dispatch = useDispatch();
@@ -11,6 +12,10 @@ export default function Register() {
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(fetchMovie());
+  }, [dispatch]);
 
   const stepItem = [
     { how: "Fill Form", bg: "#1D4ED8", color: "#4E4B66" },
