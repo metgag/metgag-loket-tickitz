@@ -1,15 +1,17 @@
 import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { getDetail } from '../../redux/slices/detailSlice';
 
 function Order() {
+  const detailState = useSelector((state) => state.detail.detail);
+  const dispatch = useDispatch();
   const [seat, setSeat] = useState([]);
-  const [detail,] = useState(
-    JSON.parse(localStorage.getItem("detail"))
-  );
+  // const [detail,] = useState(
+  //   JSON.parse(localStorage.getItem("detail"))
+  // );
   const [total, setTotal] = useState(0);
   const navigate = useNavigate();
-
-  console.log(detail)
 
   // const legend = [
   //   { id: "Available", bg: "#FCFDFE" },
@@ -63,18 +65,20 @@ function Order() {
         <div className="flex flex-col gap-6 bg-white p-6 md:p-4 py-6 rounded-lg">
           <div className="movie-detail flex border justify-between p-4 gap-4 border-[#DEDEDE] rounded-md">
             <img
-              src={`${import.meta.env.VITE_POSTER_URL}${detail.backdrop_path}`}
+              src={`${import.meta.env.VITE_POSTER_URL}${detailState.detail.backdrop_path}`}
               className="object-cover rounded-sm h-28 w-48" />
             <div className="detail flex flex-col justify-between">
-              <h3 className={hBlk}>{detail.title}</h3>
+              <h3 className={hBlk}>{detailState.detail.title}</h3>
               <div className="genre flex flex-wrap gap-2">
                 <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Action</p>
                 <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Adventure</p>
               </div>
-              <p>{`Regular - ${detail.time}`}</p>
+              <p>{`Regular - ${detailState.result.time}`}</p>
             </div>
             <button
-              className={`${btnBlu}`}>
+              className={`${btnBlu}`}
+              onClick={() => navigate('/movie/list')}
+            >
               Change
             </button>
           </div>
@@ -140,15 +144,15 @@ function Order() {
               <div className="title flex justify-between gap-[1.5rem]">
                 <p className="text-[#6B6B6B]">Movie Selected</p>
                 <p className="text-[#14142B] font-semibold">
-                  {detail.title}
+                  {detailState.detail.title}
                 </p>
               </div>
               <div className="date flex justify-between gap-[1.5rem]">
                 <p className="text-[#6B6B6B]">
-                  {detail.date}
+                  {detailState.result.date}
                 </p>
                 <p className="text-[#14142B] font-semibold">
-                  {detail.time}
+                  {detailState.result.time}
                 </p>
               </div>
               <div className="price flex justify-between gap-[1.5rem]">
@@ -175,6 +179,7 @@ function Order() {
           </div>
           <button
             onClick={() => {
+              dispatch(getDetail({ seat: seat }));
               navigate("/movie/payment")
             }}
             className={`${btnBlu} w-full py-3 shadow-lg rounded-sm`}>
