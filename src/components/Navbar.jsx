@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router'
 import { removeCurrUser } from '../redux/slices/currUserSlice';
-import { removeUser } from '../redux/slices/authSlice';
+// import { removeUser } from '../redux/slices/authSlice';
 
 export default function Navbar() {
   const currUser = useSelector((state) => state.currUser.currUser);
@@ -18,13 +18,12 @@ export default function Navbar() {
     { to: "/movie/order", page: "Buy Ticket" },
   ];
 
-  function handleLogout() {
-    dispatch(removeCurrUser());
-    dispatch(removeUser(currUser));
+  // function handleLogout() {
+    // dispatch(removeUser(currUser));
     // window.localStorage.clear();
     // console.log("logOut success");
     // window.location.reload();
-  }
+  // }
 
   return (
     <header
@@ -77,7 +76,7 @@ export default function Navbar() {
                     </Link>
                     <div
                       className={menuStyle}
-                      onClick={handleLogout}>LogOut</div>
+                      onClick={() => dispatch(removeCurrUser())}>LogOut</div>
                   </div>
                   <div className={`burger md:hidden ${menuStyle}
                     text-lg hover:opacity-40`}
@@ -85,7 +84,8 @@ export default function Navbar() {
                   >
                     <i className="nf nf-md-menu"></i>
                   </div>
-                  {vMenu &&
+                  {
+                    vMenu &&
                     <div
                       className='flex flex-col absolute text-right top-11 bg-white
                       w-max'
