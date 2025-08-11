@@ -10,6 +10,8 @@ import Order from './pages/payment/Order.jsx'
 import Payment from './pages/payment/Payment.jsx'
 import Ticket from './pages/payment/Ticket.jsx'
 import Profile from './pages/profile/Profile.jsx'
+import Table from './pages/admin/Table.jsx'
+import Chart from './pages/admin/Chart.jsx'
 
 function Router() {
   return (
@@ -38,6 +40,11 @@ function Router() {
 
         <Route path="profile" element={<ProfileLayout />}>
           <Route index element={<Profile />} />
+        </Route>
+
+        <Route path="admin" element={<ProfileLayout />}>
+          <Route path="chart" element={<Chart />} />
+          <Route path="table" element={<Table />} />
         </Route>
       </Routes>
     </BrowserRouter>
