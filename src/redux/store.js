@@ -1,10 +1,12 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import storage from 'redux-persist/lib/storage'
+import storage from 'redux-persist/lib/storage';
 import { PERSIST, persistReducer, REHYDRATE } from "redux-persist";
+import persistStore from "redux-persist/es/persistStore";
 
 import authReducer from './slices/authSlice';
-import activeReducer from './slices/currUserSlice'
-import persistStore from "redux-persist/es/persistStore";
+// import activeReducer from './slices/currUserSlice';
+import movieReducer from './slices/movieSlice';
+import detailReducer from './slices/detailSlice';
 
 const persistConfig = {
   key: "root",
@@ -15,7 +17,9 @@ const persistedReducer = persistReducer(
   persistConfig, 
   combineReducers({
     auth: authReducer,
-    currUser: activeReducer,
+    // currUser: activeReducer,
+    movies: movieReducer,
+    detail: detailReducer,
   }),
 );
 
