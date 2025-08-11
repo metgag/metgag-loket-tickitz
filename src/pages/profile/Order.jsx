@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 function Order() {
+  const { detail, result, seat } = useSelector((state) => state.detail.detail);
   const items = [
     {
-      title: "Spider-Man: Homecoming", time: "Tuesday, 07 July 2020 - 04:30pm",
+      title: detail.title, time: `${result.date} - ${result.time}`,
       isActive: true, isPaid: false
     },
     {
@@ -17,7 +19,7 @@ function Order() {
       <div className="history-wrapper gap-5 flex flex-col">
         {items.map((item, i) => {
           return <HistoryItem title={item.title} time={item.time}
-            isActive={item.isActive} isPaid={item.isPaid} i={i} />
+            isActive={item.isActive} isPaid={item.isPaid} seat={seat} key={i} />
         })}
       </div>
     </section>
@@ -60,7 +62,7 @@ function HistoryItem(props) {
       {menu &&
         <div className="paym-info flex flex-col p-[.375rem_2rem_1.5rem] gap-5">
           {props.isPaid ?
-            <TicketQR /> : <TicketInfo />
+            <TicketQR /> : <TicketInfo seat={props.seat} />
           }
         </div>
       }
@@ -110,7 +112,7 @@ function QrItem({ title, content }) {
   );
 }
 
-function TicketInfo() {
+function TicketInfo({ seat }) {
   return (
     <>
       <h3 className={h3Style}>Ticket Information</h3>
@@ -127,7 +129,7 @@ function TicketInfo() {
       </div>
       <div className="total flex justify-between">
         <p className="text-[#8692A6] text-sm">Total Payment</p>
-        <h4 className="text-[#1d4ed8]">$30</h4>
+        <h4 className="text-[#1d4ed8] font-bold text-lg">{`$${seat.length * 10}`}</h4>
       </div>
       <p className="text-[#8692A6]"
       >Pay this payment bill before it is due,
