@@ -1,11 +1,16 @@
+import { useSelector } from "react-redux";
+
 function Ticket() {
+  const { detail, result, seat } = useSelector((state) => state.detail.detail);
+  const seatLength = seat.length;
+
   const items = [
-    { title: "Movie", content: "Spider-Man:..." },
+    { title: "Movie", content: `${detail.title.slice(0, 11)}...` },
     { title: "Category", content: "PG-13" },
-    { title: "Date", content: "07 Jul" },
-    { title: "Time", content: "2:00pm" },
-    { title: "Count", content: "3pcs" },
-    { title: "Seats", content: "C4, C5, C6" },
+    { title: "Date", content: `${result.date}` },
+    { title: "Time", content: `${result.time.toLowerCase()}` },
+    { title: "Count", content: `${seatLength}pcs` },
+    { title: "Seats", content: `${seat.join(", ").slice(0, 12)}...` },
   ];
 
   return (
@@ -43,7 +48,9 @@ function Ticket() {
             })}
             <div className="item col-span-2">
               <div className="flex justify-between rounded-sm items-center px-6 py-2 border border-[#DEDEDE]">
-                <p>Total</p><p className="font-semibold text-lg">$30.00</p>
+                <p>Total</p><p className="font-semibold text-lg">
+                  {`$${seat.length * 10}.00`}
+                  </p>
               </div>
             </div>
           </div>
