@@ -1,14 +1,19 @@
 import { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router'
-import { removeCurrUser } from '../redux/slices/currUserSlice';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { removeCurrUser } from '../redux/slices/currUserSlice';
 // import { removeUser } from '../redux/slices/authSlice';
 
 export default function Navbar() {
-  const currUser = useSelector((state) => state.currUser.currUser);
-  const dispatch = useDispatch();
+  // const currUser = useSelector((state) => state.currUser.currUser);
+  // const dispatch = useDispatch();
   const [vMenu, setVMenu] = useState(false);
   const [menu, setMenu] = useState("hidden");
+  const whoami = JSON.parse(localStorage.getItem('whoami'));
+  let uname = "";
+  if (whoami) {
+    uname = whoami.email.split("@")[0];
+  }
 
   const authStyle = "p-2 px-3 rounded-md hover:opacity-[.8]";
   const menuStyle = "cursor-pointer";
@@ -34,10 +39,10 @@ export default function Navbar() {
           <img src="/tickitz-blu.svg" alt=""
             className=''
           />
-          {currUser.email !== null &&
+          {whoami &&
             <p
               className='text-[#A0A3BD] inset-0 top-3/4 absolute text-sm'
-            >Hello, {currUser.email.split('@')[0]}</p>
+            >Hello, {uname}</p>
           }
         </div>
         <div className="center gap-6 hidden md:flex">
@@ -47,7 +52,7 @@ export default function Navbar() {
         </div>
         <div className="account relative flex gap-3">
           {(() => {
-            if (currUser.email !== null) {
+            if (whoami) {
               function openMenu() {
                 if (menu === "hidden") {
                   setMenu("flex");
@@ -76,7 +81,11 @@ export default function Navbar() {
                     </Link>
                     <div
                       className={menuStyle}
-                      onClick={() => dispatch(removeCurrUser())}>LogOut</div>
+                      onClick={() => {
+                        localStorage.removeItem('whoami')
+                        window.location.reload();
+                      }
+                      }>LogOut</div>
                   </div>
                   <div className={`burger md:hidden ${menuStyle}
                     text-lg hover:opacity-40`}
