@@ -4,9 +4,11 @@ import { PERSIST, persistReducer, REHYDRATE } from "redux-persist";
 import persistStore from "redux-persist/es/persistStore";
 
 import authReducer from './slices/authSlice';
-// import activeReducer from './slices/currUserSlice';
+import loginReducer from './slices/loginSlice';
 import movieReducer from './slices/movieSlice';
-import detailReducer from './slices/detailSlice';
+import detailReducer from './slices/detailSlice.js';
+import personalReducer from "./slices/personalSlice";
+import historyReducer from './slices/historySlice';
 
 const persistConfig = {
   key: "root",
@@ -16,10 +18,12 @@ const persistConfig = {
 const persistedReducer = persistReducer(
   persistConfig, 
   combineReducers({
-    auth: authReducer,
-    // currUser: activeReducer,
-    movies: movieReducer,
-    detail: detailReducer,
+    users: authReducer,
+    whoami: loginReducer,
+    tmdb: movieReducer,
+    currDetail: detailReducer,
+    userInfo: personalReducer,
+    histories: historyReducer,
   }),
 );
 
