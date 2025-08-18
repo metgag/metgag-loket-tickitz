@@ -1,15 +1,26 @@
+import { format } from "date-fns";
 import { useSelector } from "react-redux";
+import { useContext, useEffect } from "react";
+import { historyContext as HistoryContext } from "../../context/history/historyContext";
+import { orderContext as OrderContext } from "../../context/order/orderContext";
+import useLocalStorage from "../../hooks/useLocalStorage";
 
 function Ticket() {
-  const { detail, result, seat } = useSelector((state) => state.detail.detail);
-  const seatLength = seat.length;
+  const { movie, schedule, seat } = useSelector((state) => state.currDetail);
+  const { addHistoryContext } = useContext(HistoryContext);
+  const { currOrder } = useContext(OrderContext)
+  const [lclHistory, setLclHistory] = useLocalStorage("history", []);
+
+  useEffect(() => {
+    addHistoryContext(currOrder);
+  }, []);
 
   const items = [
-    { title: "Movie", content: `${detail.title.slice(0, 11)}...` },
+    { title: "Movie", content: `${movie.title.slice(0, 11)}...` },
     { title: "Category", content: "PG-13" },
-    { title: "Date", content: `${result.date}` },
-    { title: "Time", content: `${result.time.toLowerCase()}` },
-    { title: "Count", content: `${seatLength}pcs` },
+    { title: "Date", content: `${format(schedule.date, "dd LLL")}` },
+    { title: "Time", content: `${schedule.time.toLowerCase()}` },
+    { title: "Count", content: `${seat.length}pcs` },
     { title: "Seats", content: `${seat.join(", ").slice(0, 12)}...` },
   ];
 
@@ -37,20 +48,20 @@ function Ticket() {
           <img className="p-[2rem_0]" width="160" src="/qr.png" alt="" />
           {["flex-end translate-x-76 md:translate-x-34",
             "flex-start -translate-x-76 md:-translate-x-34"].map((item, i) => {
-              return <DotSide pos={item} i={i} />
+              return <DotSide pos={item} key={i} />
             })}
           <div
             className="grid-detail border-t w-full text-center md:text-left 
               md:w-max border-[#DEDEDE] pt-[3rem] grid grid-cols-2 gap-[1.25rem]"
           >
             {items.map((item, i) => {
-              return <Item title={item.title} content={item.content} i={i} />
+              return <Item title={item.title} content={item.content} key={i} />
             })}
             <div className="item col-span-2">
               <div className="flex justify-between rounded-sm items-center px-6 py-2 border border-[#DEDEDE]">
                 <p>Total</p><p className="font-semibold text-lg">
                   {`$${seat.length * 10}.00`}
-                  </p>
+                </p>
               </div>
             </div>
           </div>
@@ -67,7 +78,7 @@ function Ticket() {
         </div>
       </aside>
     </main>
-  )
+  );
 }
 
 function DotSide(props) {
@@ -76,7 +87,7 @@ function DotSide(props) {
       key={props.i}
       className={`${props.pos} absolute size-8 bg-[#ecedf2] rounded-full bottom-[320px]`}>
     </div>
-  )
+  );
 }
 
 function Item(props) {
@@ -85,7 +96,7 @@ function Item(props) {
       <h5 className="text-[#AAAAAA] font-medium text-sm">{props.title}</h5>
       <p className="text-[#14142B] font-semibold">{props.content}</p>
     </div>
-  )
+  );
 }
 
 export default Ticket
