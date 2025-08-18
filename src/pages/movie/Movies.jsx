@@ -1,69 +1,50 @@
-import { Fragment, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Fragment, useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import Subscription from '../../components/Subscription'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getDiscoverMovie, getGenres, getSearch } from '../../redux/slices/movieSlice';
+import toGenre from '../../utils/toGenre';
+import { getCredit, getDetail } from '../../redux/slices/detailSlice';
 // import { movieActions } from '../../redux/slices/movieSlice';
 
 export default function Movies() {
-  const movieState = useSelector((state) => state.movies.movies);
-  // const genres = useSelector((state) => state.movies.movies.genreList);
+  const { movies, genres } = useSelector((state) => state.tmdb);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [pageNm, setPageNm] = useState([1, 2, 3, 4, 5]);
+  const [searchParams, setSearchParams] = useSearchParams("");
+  const currPage = searchParams.get("page") || 1;
+  const currGenre = searchParams.get("genre") || "";
+  const [currQuery, setQuery] = useState("");
 
-  // useEffect(() => {
-  //   dispatch(movieActions.getMoviesThunk());
-  // }, [dispatch]);
+  // reset if there is no search params
+  useEffect(() => {
+    if (!currQuery &&
+      !currGenre &&
+      !currPage) setSearchParams("");
+  },
+    [currGenre, currPage, currQuery, setSearchParams]);
 
-  // const [movies, setMovies] = useState([]);
-  // const [genres, setGenres] = useState([]);
-  const [search, setSearch] = useState("");
-  // const [searchParams,] = useSearchParams({ page: 1 });
-  const { movies } = movieState;
+  useEffect(() => { dispatch(getGenres()); }, [dispatch]);
 
-  // const apiToken = import.meta.env.VITE_API_TOKEN;
-  // const urlMovies = `${import.meta.env.VITE_MOVIES_URL}&${searchParams.toString()}`;
-  // const urlGenres = import.meta.env.VITE_GENRES_URL;
-  // const options = {
-  //   method: 'GET',
-  //   headers: {
-  //     accept: 'application/json',
-  //     Authorization: `Bearer ${apiToken}`
-  //   }
-  // };
+  useEffect(() => {
+    if (!currQuery) {
+      dispatch(getDiscoverMovie({
+        page: currPage, genre: currGenre
+      }));
+    }
+  }, [currGenre, currPage, currQuery, dispatch]);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const promises = [fetch(urlMovies, options), fetch(urlGenres, options)];
-  //     const [moviesResp, genresResp] = await Promise.all(promises);
-  //     const { results: movieResults } = await moviesResp.json();
-  //     const { genres } = await genresResp.json();
-  //     const genresMap = new Map();
-  //     genres.forEach((genre) => {
-  //       genresMap.set(genre.id, genre.name);
-  //     });
-
-  //     const movies = movieResults.map((movie) => {
-  //       const { id, title, genre_ids, poster_path } = movie;
-  //       const result = {
-  //         id,
-  //         title,
-  //         poster_path,
-  //       };
-  //       const genres = genre_ids.map((genreId) => {
-  //         return genresMap.get(genreId);
-  //       });
-  //       Object.assign(result, { genres });
-  //       return result;
-  //     });
-
-  //     setMovies(movies);
-  //     setGenres(genres);
-  //   })();
-  // }, [searchParams]);
-
-  function handleSearch(e) {
-    const input = (e.target.value);
-    setSearch(() => input);
-  }
+  useEffect(() => {
+    if (currQuery) {
+      dispatch(getSearch(currQuery));
+      setSearchParams({ query: currQuery });
+      if (currPage) {
+        dispatch(getSearch({ query: currQuery, page: currPage }));
+        setSearchParams({ query: currQuery, page: currPage })
+      }
+    }
+  }, [currPage, currQuery, dispatch, setSearchParams]);
 
   return (
     <main className="flex flex-col">
@@ -88,66 +69,99 @@ export default function Movies() {
 
         <section id="event" className="flex px-8 md:px-28 gap-6">
           <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setQuery(e.target.search.value);
+            }}
             className='flex flex-col gap-4'>
             <label htmlFor="find" className='text-[#4E4B66] w-max'>
               Cari Movie
             </label>
-            <div className='flex'>
-              <input onChange={handleSearch} type="text" name="" id="find"
+            <div className='flex items-center relative'>
+              <input type="text" name="search" id="find"
                 placeholder="New Born Expert"
                 className='p-3 border border-[#DEDEDE] rounded-sm 
               placeholder:text-[#A0A3BD]' />
+              <button className='absolute right-0 text-[#a0a3bd] h-full w-12 flex items-center justify-center cursor-pointer hover:opacity-65'
+              >
+                <i className="nf nf-fa-search"></i>
+              </button>
             </div>
           </form>
 
-          <div id="filter" className='flex flex-col gap-4'>
-            <label htmlFor="" className='text-[#4E4B66]'>Filter</label>
-            <div className='flex flex-wrap'>
-              {/* {genres.splice(0, 7).map((genre) => {
-                return (
-                  <button className='p-2 px-4 hover:bg-[#1D4ED8] 
-                  hover:cursor-pointer hover:text-white rounded-xl'>
-                    {genre.name}
-                  </button>
-                )
-              })} */}
+          <form id="filter" className='flex flex-col gap-4'>
+            <h4 className='text-[#4E4B66]'>Filter</h4>
+            <div className='flex flex-wrap gap-4'>
+              {genres &&
+                genres.map(({ id, name }, i) => {
+                  return (
+                    <div key={i}>
+                      <input type="checkbox" id={id}
+                        className="hidden"
+                      />
+                      <label htmlFor={id}
+                        onClick={() => {
+                          if (currQuery) setQuery("");
+                          setSearchParams({ genre: id });
+                        }}
+                        className={`p-2 px-3 hover:bg-[#1D4ED8] hover:cursor-pointer hover:text-white rounded-xl`}
+                      >
+                        {name}
+                      </label>
+                    </div>
+                  );
+                })}
+
+              {/* {genres &&
+                genres.map((genre) => {
+                  return (
+                    <button className='p-2 px-4 hover:bg-[#1D4ED8] hover:cursor-pointer hover:text-white rounded-xl'>
+                      {genre.name}
+                    </button>
+                  )
+                })} */}
             </div>
-          </div>
+          </form>
         </section>
 
-        <section id="watch-today" className="flex px-8 md:px-28 flex-col items-center">
+        <section id="watch-today" 
+        className="flex px-8 md:px-28 flex-col items-center">
           <div className="movies-grid grid grid-cols-2 md:grid-cols-4 gap-8">
-            {movies.length > 0 &&
+            {movies &&
               movies
-                .filter(({ title }) => {
-                  if (!search) return true;
-                  return title.toLowerCase().includes(search.toLowerCase());
-                })
-                .sort(({ title: a }, { title: b }) => {
-                  if (a < b) return -1;
-                  if (a > b) return 1;
-                  return 0;
-                })
                 .map((movie) => {
                   return (
                     <div key={movie.id} className={`thumbnail-${movie.id} 
                   flex flex-col gap-3`}>
-                      <img
-                        onClick={() => {
-                          navigate(`/movie/detail/${movie.id}`);
-                        }}
-                        className="hover:opacity-[.8] hover:cursor-pointer rounded-md"
-                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                        alt=""
-                      />
+                      <div className='flex flex-col justify-center relative'>
+                        <img
+                          onClick={() => {
+                            navigate(`/movie/detail/${movie.id}`);
+                          }}
+                          className="hover:opacity-[.8] rounded-md aspect-3/5 object-cover cursor-pointer"
+                          src={`${movie.poster_path ?
+                            `https://image.tmdb.org/t/p/w500${movie.poster_path}` :
+                            `https://upload.wikimedia.org/wikipedia/commons/8/8d/ERR0R_NO_IMAGE_FOUND.jpg`
+                            }`}
+                          alt=""
+                        />
+                        {/* <div className="btn absolute self-center flex flex-col gap-2 z-9998 border h-full w-full justify-center">
+                          <button className='border border-white text-white rounded-md p-2 w-64 hover:opacity-[.8] cursor-pointer self-center'>
+                            Details
+                          </button>
+                          <button className='text-white bg-[#1D4ED8] rounded-md w-64 p-2 hover:opacity-[.8] cursor-pointer self-center'>
+                            Buy Ticket
+                          </button>
+                        </div> */}
+                      </div>
                       <h4 className='text-[#14142B] font-bold text-lg'>
                         {movie.title}
                       </h4>
                       <div className="genre flex flex-wrap gap-3">
-                        {movie.genres.map((genre, id) => {
+                        {movie.genre_ids.map((genre, id) => {
                           return <p key={id} className='px-3 rounded-full 
                       text-[#A0A3BD] bg-[#A0A3BD1A]'>
-                            {genre}
+                            {toGenre(genre, genres)}
                           </p>
                         })}
                       </div>
@@ -156,19 +170,41 @@ export default function Movies() {
                 })}
           </div>
           <div id="pg-nav" className="flex mt-6 items-center gap-4">
-            {[1, 2, 3, 4].map((e, i) => {
+            {pageNm.map((e, i) => {
               return <button key={i}
-                className="text-[#4E4B66] size-8 flex items-center 
+                onClick={() => {
+                  if (currGenre) {
+                    return setSearchParams({ page: e, genre: currGenre });
+                  }
+                  setSearchParams({ page: e });
+                }}
+                className={`text-[#4E4B66] size-8 flex border items-center 
                   justify-center rounded-full hover:bg-[#1D4ED8] 
                   hover:text-white hover:border-none hover:cursor-pointer 
-                  hover:[#FFFFFF]"
+                  hover:[#FFFFFF] ${currPage == e &&
+                  `bg-[#1d4ed8] text-white border-none`
+                  }`}
               >
                 {e}
               </button>
             })}
             <i
+              className="nf nf-oct-arrow_left p-2 rounded-full 
+              hover:bg-[#1D4ED8] hover:text-white hover:cursor-pointer"
+              onClick={() => {
+                if (pageNm[0] == 1) return;
+                setPageNm(pageNm.map((e) => e - 5))
+              }}
+            >
+            </i>
+            <i
               className="nf nf-oct-arrow_right p-2 rounded-full 
-              hover:bg-[#1D4ED8] hover:text-white hover:cursor-pointer">
+              hover:bg-[#1D4ED8] hover:text-white hover:cursor-pointer"
+              onClick={() => {
+                if (pageNm[4] == 20) return;
+                setPageNm(pageNm.map((e) => e + 5))
+              }}
+            >
             </i>
           </div>
         </section>
