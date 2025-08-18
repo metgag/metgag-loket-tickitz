@@ -1,59 +1,33 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { getDetail } from '../../redux/slices/detailSlice';
+import { orderContext as OrderContext } from '../../context/order/orderContext';
+import { format } from 'date-fns';
+import { addSeat } from '../../redux/slices/detailSlice';
 
 function Order() {
-  const detailState = useSelector((state) => state.detail.detail);
+  const { schedule } = useSelector((state) => state.currDetail);
   const dispatch = useDispatch();
+  const { movie } = useSelector((state) => state.currDetail);
   const [seat, setSeat] = useState([]);
-  // const [detail,] = useState(
-  //   JSON.parse(localStorage.getItem("detail"))
-  // );
-  const [total, setTotal] = useState(0);
   const navigate = useNavigate();
+  const { mkOrder, currOrder } = useContext(OrderContext);
 
-  // const legend = [
-  //   { id: "Available", bg: "#FCFDFE" },
-  //   { id: "Selected", bg: "#1D4ED8" },
-  //   { id: "Love nest", bg: "#F589D7" },
-  //   { id: "Sold", bg: "#6E7191" },
-  // ];
   const btnBlu = "btn-change h-min px-5 py-1 self-end rounded-md bg-[#1D4ED8] text-white font-medium hover:opacity-[.8] hover:cursor-pointer";
   const hBlk = "text-[#14142B] text-2xl font-semibold";
   const hLeft = "text-xl font-semibold";
 
-  function handleChange(e) {
-    e.preventDefault();
+  const seats = (init, end) => {
+    const result = [];
+    const charId = ["A", "B", "C", "D", "E", "F", "G"];
 
-    if (e.target.type === "checkbox") {
-      setSeat((arrSeat) => {
-        if (!arrSeat.includes(e.target.id)) {
-          setTotal((total) => total + .5);
-          return [...arrSeat, e.target.id];
-        } else {
-          if (arrSeat.length > 0) {
-            setTotal((total) => total - .5);
-            return arrSeat.filter((seat) => seat !== e.target.id);
-          }
-        }
-      });
+    for (let i = 0; i < charId.length; i++) {
+      for (let j = init; j <= end; j++) {
+        result.push(`${charId[i]}${j}`);
+      }
     }
+    return result;
   }
-
-  // function handleSubmit(e) {
-  //   e.preventDefault();
-  //   const foo = [];
-  //   console.log(e.target.length);
-
-  //   for (let i = 0; i < e.target.length; i++) {
-  //     if (e.target[i].checked) {
-  //       foo.push(e.target[i].id);
-  //     }
-  //   }
-
-  //   setSeat(foo);
-  // }
 
   return (
     <main className="bg-[#ECEDF2] py-20 px-6 md:px-0">
@@ -62,21 +36,24 @@ function Order() {
       <div className="flex-container flex flex-col justify-center gap-4
           md:flex-row
         ">
-        <div className="flex flex-col gap-6 bg-white p-6 md:p-4 py-6 rounded-lg">
-          <div className="movie-detail flex border justify-between p-4 gap-4 border-[#DEDEDE] rounded-md">
+        <div className="flex shadow-sm flex-col gap-6 bg-white p-6 md:p-4 py-6 rounded-lg">
+          <div className="movie-detail flex border p-4 gap-4 border-[#DEDEDE] rounded-md">
             <img
-              src={`${import.meta.env.VITE_POSTER_URL}${detailState.detail.backdrop_path}`}
+              src={`${import.meta.env.VITE_POSTER_URL}${movie.backdrop_path}`}
               className="object-cover rounded-sm h-28 w-48" />
             <div className="detail flex flex-col justify-between">
-              <h3 className={hBlk}>{detailState.detail.title}</h3>
+              <h3 className={hBlk}>{movie.title.length > 16 ?
+                `${movie.title.slice(0, 14)}...` :
+                `${movie.title}`
+              }</h3>
               <div className="genre flex flex-wrap gap-2">
                 <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Action</p>
                 <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Adventure</p>
               </div>
-              <p>{`Regular - ${detailState.result.time}`}</p>
+              <p>{`Regular - ${schedule.time}`}</p>
             </div>
             <button
-              className={`${btnBlu}`}
+              className={`${btnBlu} ms-auto`}
               onClick={() => navigate('/movie/list')}
             >
               Change
@@ -84,29 +61,70 @@ function Order() {
           </div>
           <div className="seat flex flex-col gap-2">
             <h3 className={hLeft}>Choose Your Seat</h3>
-            <p className='self-center mb-8'>Screen</p>
-            <form onMouseDown={handleChange} className="grid grid-cols-2" action="">
-              <div className="grid-seat-a grid grid-cols-8 gap-[.5rem]">
-                <div>A</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A1" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A2" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A3" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A4" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A5" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A6" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A7" /><div>B</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B1" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B2" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B3" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B4" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B5" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B6" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B7" /><div>C</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C1" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C2" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C3" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C4" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C5" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C6" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C7" /><div>D</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D1" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D2" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D3" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D4" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D5" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D6" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D7" /><div>E</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E1" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E2" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E3" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E4" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E5" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E6" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E7" /><div>F</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F1" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F2" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F3" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F4" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F5" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F6" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F7" /><div>G</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G1" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G2" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G3" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G4" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G5" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G6" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G7" />
-                <div className="seat seat-char-7 invisible">_</div>
-                <div className="seat seat-num-1 text-center">1</div>
-                <div className="seat seat-num-2 text-center">2</div>
-                <div className="seat seat-num-3 text-center">3</div>
-                <div className="seat seat-num-4 text-center">4</div>
-                <div className="seat seat-num-5 text-center">5</div>
-                <div className="seat seat-num-6 text-center">6</div>
-                <div className="seat seat-num-7 text-center">7</div>
+            <p className='self-center mb-8 ps-8'>Screen</p>
+            <form
+              className="flex gap-x-16"
+            >
+              <div className='flex gap-8'>
+                <div className="flex flex-col gap-y-5 text-lg font-semibold text-[#4E4B66]">
+                  {["A", "B", "C", "D", "E", "F", "G"].map((e, i) => {
+                    return <p
+                      className='h-8 flex items-center' key={i}
+                    >
+                      {e}
+                    </p>
+                  })}
+                </div>
+                <div className="flex flex-col gap-6">
+                  <div className='seat-a grid grid-cols-7 gap-3'>
+                    {seats(1, 7).map((e, i) => {
+                      return <Seat
+                        key={i}
+                        id={e}
+                        name={e}
+                        selected={seat}
+                        onChange={(e) => {
+                          setSeat((curr) => {
+                            if (curr.includes(e.target.name)) {
+                              return curr.filter((update) => {
+                                return update !== e.target.name;
+                              })
+                            }
+                            return [...curr, e.target.name];
+                          })
+                        }}
+                      />
+                    })}
+                  </div>
+                  <div className='grid grid-cols-7 text-center gap-x-2 text-lg font-semibold text-[#4E4B66]'>
+                    {[1, 2, 3, 4, 5, 6, 7].map((e) => <p key={e}>{e}</p>)}
+                  </div>
+                </div>
               </div>
-              <div className="grid-seat-b grid grid-cols-8 gap-[.5rem]">
-                <div className="invisible">_</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A8" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A9" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A10" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A11" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A12" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A13" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="A14" /><div className="invisible">_</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B8" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B9" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B10" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B11" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B12" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B13" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="B14" /><div className="invisible">_</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C8" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C9" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C10" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C11" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C12" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C13" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="C14" /><div className="invisible">_</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D8" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D9" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D10" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D11" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D12" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D13" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="D14" /><div className="invisible">_</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E8" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E9" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E10" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E11" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E12" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E13" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="E14" /><div className="invisible">_</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F8" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F9" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F10" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F11" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F12" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F13" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="F14" /><div className="invisible">_</div><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G8" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G9" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G10" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G11" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G12" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G13" /><input className="accent-[#1D4ED8] hover:cursor-pointer" type="checkbox" id="G14" />
-                <div className="invisible">_</div>
-                <div className="seat seat-num-1 text-center">8</div>
-                <div className="seat seat-num-2 text-center">9</div>
-                <div className="seat seat-num-3 text-center">10</div>
-                <div className="seat seat-num-4 text-center">11</div>
-                <div className="seat seat-num-5 text-center">12</div>
-                <div className="seat seat-num-6 text-center">13</div>
-                <div className="seat seat-num-7 text-center">14</div>
+              <div className="flex flex-col gap-6">
+                <div className='seat-b grid grid-cols-7 gap-3'>
+                  {seats(8, 14).map((e, i) => {
+                    return <Seat
+                      key={i}
+                      id={e}
+                      name={e}
+                      selected={seat}
+                      onChange={(e) => {
+                        setSeat((curr) => {
+                          if (curr.includes(e.target.name)) {
+                            return curr.filter((update) => {
+                              return update !== e.target.name;
+                            })
+                          }
+                          return [...curr, e.target.name];
+                        })
+                      }}
+                    />
+                  })}
+                </div>
+                <div className='grid grid-cols-7 text-center gap-x-2 text-lg font-semibold text-[#4E4B66]'>
+                  {[8, 9, 10, 11, 12, 13, 14].map((e) => <p key={e}>{e}</p>)}
+                </div>
               </div>
             </form>
             <div className="seat-key flex flex-col gap-4">
@@ -132,10 +150,12 @@ function Order() {
             </div>
           </div>
         </div>
-        <aside className="flex flex-col h-min gap-8 min-w-md">
+        <aside className="flex flex-col h-min gap-8 min-w-sm">
           <div className="cinema bg-white flex p-6 py-6 flex-col gap-6 rounded-lg shadow-md">
             <div className="cinema-name flex flex-col items-center gap-2">
-              <img src="/sponsor/cine.svg" alt="" />
+              <img src={`/sponsor/${schedule.cinema}.svg`} alt=""
+                className='w-42'
+              />
               <h3 className={`${hBlk}`}>
                 CineOne21 Cinema
               </h3>
@@ -144,15 +164,18 @@ function Order() {
               <div className="title flex justify-between gap-[1.5rem]">
                 <p className="text-[#6B6B6B]">Movie Selected</p>
                 <p className="text-[#14142B] font-semibold">
-                  {detailState.detail.title}
+                  {movie.title.length > 22 ?
+                    `${movie.title.slice(0, 20)}...` :
+                    `${movie.title}`
+                  }
                 </p>
               </div>
               <div className="date flex justify-between gap-[1.5rem]">
                 <p className="text-[#6B6B6B]">
-                  {detailState.result.date}
+                  {format(schedule.date, "EEEE, dd LLLL yyyy")}
                 </p>
                 <p className="text-[#14142B] font-semibold">
-                  {detailState.result.time}
+                  {schedule.time.replaceAll(" ", "").toLowerCase()}
                 </p>
               </div>
               <div className="price flex justify-between gap-[1.5rem]">
@@ -163,23 +186,29 @@ function Order() {
               </div>
               <div className="seat flex justify-between gap-[1.5rem] mb-3">
                 <p className="text-[#6B6B6B]">Seat choosed</p>
-                {seat.length > 0 && <p className="text-[#14142B] font-semibold">
-                  {seat.join(", ")}
-                </p>}
-                {/* <p>{seat.join(", ")}</p> */}
+                {seat.length > 0 &&
+                  <p className="text-[#14142B] font-semibold">
+                    {seat &&
+                      seat.join(", ").length > 20 ?
+                      `${seat.join(", ").slice(0, 24)}...` :
+                      `${seat.join(", ")}`
+                    }
+                  </p>}
               </div>
             </div>
             <div
               className="total pt-5 flex justify-between items-center border-t border-[#E6E6E6]">
               <h4 className="font-medium text-lg">Total Payment</h4>
               <h3 className='text-[#1D4ED8] text-2xl font-semibold'>
-                {`$${total * 10}`}
+                {`$${seat.length * 10}`}
               </h3>
             </div>
           </div>
           <button
             onClick={() => {
-              dispatch(getDetail({ seat: seat }));
+              // dispatch(addOrderDetail({ ...orderDetail, seat }));
+              dispatch(addSeat(seat));
+              mkOrder({ ...currOrder, seat});
               navigate("/movie/payment")
             }}
             className={`${btnBlu} w-full py-3 shadow-lg rounded-sm`}>
@@ -188,7 +217,23 @@ function Order() {
         </aside>
       </div>
     </main>
-  )
+  );
+}
+
+function Seat({ id, name, selected, onChange }) {
+  return (
+    <div className='size-10'>
+      <label htmlFor={id}
+        className={`h-full block ${selected.includes(name) ?
+          "bg-[#1D4ED8]" : "bg-[#D6D8E7]"
+          } rounded-sm cursor-pointer hover:opacity-[.6]`}
+      >
+      </label>
+      <input type="checkbox" name={name} id={id}
+        onChange={onChange} className="hidden"
+      />
+    </div>
+  );
 }
 
 function MkLegend(props) {
