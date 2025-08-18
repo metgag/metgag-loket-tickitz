@@ -1,25 +1,26 @@
-import { useState } from "react";
+import { format, set } from "date-fns";
+import { useContext, useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
+import { historyContext as HistoryContext } from "../../context/history/historyContext";
 
 function Order() {
-  const { detail, result, seat } = useSelector((state) => state.detail.detail);
-  const items = [
-    {
-      title: detail.title, time: `${result.date} - ${result.time}`,
-      isActive: true, isPaid: false
-    },
-    {
-      title: "Avengers: End Game", time: "Monday, 14 June 2020 - 02:00pm",
-      isActive: false, isPaid: true
-    },
-  ];
+  // const { storeSelected } = useSelector((state) => state.selectedMovie);
+  // const { selected, orderDetail } = useSelector((state) => state.selectedMovie);
+  const { histories } = useContext(HistoryContext)
 
   return (
     <section className="flex rounded-2xl flex-col gap-7">
       <div className="history-wrapper gap-5 flex flex-col">
-        {items.map((item, i) => {
-          return <HistoryItem title={item.title} time={item.time}
-            isActive={item.isActive} isPaid={item.isPaid} seat={seat} key={i} />
+        {[...histories].reverse().map((e, i) => {
+          return <HistoryItem
+            title={e.movie.title}
+            date={e.schedule.date}
+            time={e.schedule.time}
+            seat={e.seat}
+            // isActive={!e.isPaid}
+            // isPaid={e.isPaid}
+            key={i} />
         })}
       </div>
     </section>
@@ -30,15 +31,15 @@ function HistoryItem(props) {
   const [menu, setMenu] = useState(false);
 
   return (
-    <div key={props.i}
-      className="history history-1 bg-white rounded-2xl">
+    < div key={props.i}
+      className="history history-1 bg-white rounded-2xl" >
       <div className="history-a flex p-[1.5rem_2rem] justify-between 
       items-center border-b border-[#DEDEDE] md:border-none">
         <div className="date-title flex flex-col gap-2">
-          <p className="text-[#AAAAAA]">{props.time}</p>
+          <p className="text-[#AAAAAA]">{format(props.date, "EEEE, dd LLLL yyyy")} - {props.time}</p>
           <h3 className="font-semibold text-2xl">{props.title}</h3>
         </div>
-        <img src="/sponsor/cine.svg" alt="" />
+        <img src={`/sponsor/${props.cinema}.svg`} alt="" />
       </div>
       <div className="history-b flex flex-col md:flex-row p-[1.5rem_2rem] md:justify-between">
         <div className="btn flex gap-3 flex-col md:flex-row">
@@ -59,43 +60,47 @@ function HistoryItem(props) {
             className={`nf nf-cod-chevron_${menu ? "up" : "down"}`}>
           </i></h4>
       </div>
-      {menu &&
+      {
+        menu &&
         <div className="paym-info flex flex-col p-[.375rem_2rem_1.5rem] gap-5">
           {props.isPaid ?
-            <TicketQR /> : <TicketInfo seat={props.seat} />
+            <TicketQR title={props.title} seat={props.seat} time={props.time} date={props.date} /> : <TicketInfo seat={props.seat} date={props.date} />
           }
         </div>
       }
-    </div>
+    </div >
   );
 }
 
 const h3Style = "fw-md text-[#14142B]";
 
-function TicketQR() {
+function TicketQR({ time, seat, title, date }) {
+  const orderDate = parseInt(date.split("-")[2]) + 2;
+  const watchDate = set(new Date(date), { date: orderDate });
+
   const items = [
     { title: "Category", content: "PG-13" },
-    { title: "Time", content: "2:00 pm" },
-    { title: "Seats", content: "C4, C5, C6" },
-    { title: "Movie", content: "Spider-Man: .." },
-    { title: "Date", content: "07 Jul" },
-    { title: "Count", content: "3pcs" },
+    { title: "Time", content: time.toLowerCase() },
+    { title: "Seats", content: `${seat.join(', ')}` },
+    { title: "Movie", content: title },
+    { title: "Date", content: format(watchDate, "dd LLL") },
+    { title: "Count", content: `${seat.length} pcs` },
   ];
 
   return (
     <>
-      <h3 className={h3Style}>Ticket Information</h3>
-      <div className="ticket-card flex items-center gap-8">
+      <h3 className={`${h3Style} text-xl font-semibold`}>Ticket Information</h3>
+      <div className="ticket-card md:flex items-center gap-8">
         <img width="160" src="/qr.png" alt="" />
-        <div className="grid-detail grid grid-cols-3 gap-4">
+        <div className="grid-detail md:w-max grid grid-cols-3 gap-4 gap-x-6">
           {items.map((e, i) => {
             return <QrItem title={e.title} content={e.content} key={i} />
           })}
         </div>
-        <div className="">
+        <div className="mt-6 md:ms-auto md:me-16">
           <h4 className="flex flex-col font-semibold">
             <p>Total</p>
-            <p className="text-xl">$30.00</p>
+            <p className="text-2xl">{`$${seat.length * 10}.00`}</p>
           </h4>
         </div>
       </div>
@@ -107,15 +112,19 @@ function QrItem({ title, content }) {
   return (
     <div className="item">
       <h5 className="text-[#aaaaaa]">{title}</h5>
-      <p className="text-[#14142B]">{content}</p>
+      <p className="text-wrap text-[#14142B] font-semibold">{content}</p>
     </div>
   );
 }
 
-function TicketInfo({ seat }) {
+function TicketInfo({ seat, date }) {
+  const navigate = useNavigate();
+  const endPaym = parseInt(date.split("-")[2]) + 2;
+  const endDate = set(new Date(date), { date: endPaym })
+
   return (
     <>
-      <h3 className={h3Style}>Ticket Information</h3>
+      <h3 className={`${h3Style} text-xl font-semibold`}>Ticket Information</h3>
       <div className="no-rek flex items-center justify-between">
         <p className="text-[#8692A6] text-sm">No. Rekening Virtual</p>
         <div className="side flex items-center gap-3.5">
@@ -133,13 +142,13 @@ function TicketInfo({ seat }) {
       </div>
       <p className="text-[#8692A6]"
       >Pay this payment bill before it is due,
-        <span className="text-[#D00707]"> on June
-          23, 2023</span>. If the bill has not been paid by
-        the specified time, it will be forfeited
+        <span className="text-[#D00707]"> on {format(endDate, "LLLL dd, yyyy")}</span>. If the bill has not been paid by
+        the specified time, it will be forfeited.
       </p>
       <button
-        className="bg-[#1d4ed8] text-white rounded-sm font-medium 
-      p-[.625rem_3rem] text-sm"
+        className="bg-[#1d4ed8] md:w-max text-white rounded-sm font-medium 
+      p-[.625rem_3rem] text-sm cursor-pointer hover:opacity-[.8]"
+        onClick={() => navigate("/movie/ticket")}
       >Cek Pembayaran</button>
     </>
   );
