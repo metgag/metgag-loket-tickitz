@@ -12,10 +12,10 @@ function Profile() {
     <main
       className="flex flex-col p-6 
       md:grid md:grid-cols-[max-content_1fr] bg-[#f5f6f8] md:p-[2.5rem_6rem] 
-        gap-[1.5rem]">
+        gap-[1.5rem] min-h-screen">
       <aside
         className="w-full flex flex-col bg-white text-[#4E4B66] rounded-3xl 
-          justify-self-start md:w-fit">
+          justify-self-start md:w-fit h-max">
         <div
           className="info flex flex-col p-[1.5rem_2.5rem] gap-[1.25rem] border-b 
           border-[#DEDEDE]">
