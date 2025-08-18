@@ -1,58 +1,65 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
-// import { useDispatch, useSelector } from 'react-redux';
-// import { removeCurrUser } from '../redux/slices/currUserSlice';
-// import { removeUser } from '../redux/slices/authSlice';
+import { Link, useNavigate } from 'react-router'
+import { useDispatch, useSelector } from 'react-redux';
+import toast, { Toaster } from 'react-hot-toast';
+import { rmCurrUser } from '../redux/slices/loginSlice';
 
 export default function Navbar() {
-  // const currUser = useSelector((state) => state.currUser.currUser);
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const [vMenu, setVMenu] = useState(false);
   const [menu, setMenu] = useState("hidden");
-  const whoami = JSON.parse(localStorage.getItem('whoami'));
-  let uname = "";
-  if (whoami) {
-    uname = whoami.email.split("@")[0];
-  }
+  const navigate = useNavigate();
+  const { isLogged, email } = useSelector((state) => state.whoami);
 
   const authStyle = "p-2 px-3 rounded-md hover:opacity-[.8]";
   const menuStyle = "cursor-pointer";
   const pages = [
     { to: "/", page: "Home" },
     { to: "/movie/list", page: "Movie" },
-    { to: "/movie/order", page: "Buy Ticket" },
+    // { to: "/movie/order", page: "Buy Ticket" },
   ];
 
   // function handleLogout() {
-    // dispatch(removeUser(currUser));
-    // window.localStorage.clear();
-    // console.log("logOut success");
-    // window.location.reload();
+  // dispatch(removeUser(currUser));
+  // window.localStorage.clear();
+  // console.log("logOut success");
+  // window.location.reload();
   // }
 
   return (
     <header
       className="py-2 px-6 md:px-28 sticky top-0 border-[#DEDEDE] text-sm 
         font-medium border-b bg-white z-9999">
+      <Toaster />
       <nav className="flex items-center justify-between relative">
         <div className="logo flex items-center relative gap-2">
           <img src="/tickitz-blu.svg" alt=""
             className=''
           />
-          {whoami &&
+          {isLogged &&
             <p
               className='text-[#A0A3BD] inset-0 top-3/4 absolute text-sm'
-            >Hello, {uname}</p>
+            >Hello, {email.split("@")[0]}</p>
           }
         </div>
         <div className="center gap-6 hidden md:flex">
           {pages.map((page, i) => {
             return <ListItem key={i} to={page.to} page={page.page} />
           })}
+          <div
+            className='text-[#0F172A] font-semibold hover:text-blue-900 cursor-pointer'
+            onClick={() => {
+              if (!isLogged) {
+                toast.error("Login terlebih dahulu untuk memesan tiket.")
+                return;
+              }
+              navigate("/movie/order");
+            }}
+          >Buy Ticket</div>
         </div>
         <div className="account relative flex gap-3">
           {(() => {
-            if (whoami) {
+            if (isLogged) {
               function openMenu() {
                 if (menu === "hidden") {
                   setMenu("flex");
@@ -82,8 +89,9 @@ export default function Navbar() {
                     <div
                       className={menuStyle}
                       onClick={() => {
-                        localStorage.removeItem('whoami')
-                        window.location.reload();
+                        // localStorage.removeItem('whoami')
+                        // window.location.reload();
+                        dispatch(rmCurrUser());
                       }
                       }>LogOut</div>
                   </div>
@@ -116,7 +124,7 @@ export default function Navbar() {
               return (
                 <div
                   className='flex items-center justify-end gap-2 relative'>
-                  <div>
+                  <div className='flex gap-2'>
                     <Link
                       className={`${authStyle} border border-[#1D4ED8] text-[#1D4ED8]`}
                       to="/auth/login">
