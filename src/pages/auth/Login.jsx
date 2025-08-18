@@ -1,21 +1,17 @@
-import { Fragment, useState } from 'react'
-import { useSelector } from 'react-redux';
+import { Fragment, useContext, useState } from 'react'
+import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
-// import { addUser } from '../../redux/slices/currUserSlice';
-import useLocalStorage from '../../hooks/useLocalStorage';
+import { addUser } from '../../redux/slices/loginSlice';
+import { regContext } from '../../context/users/regContext';
 
-export default function Login() {
-  const users = useSelector((state) => state.auth.users);
-  // const dispatch = useDispatch();
+function Login() {
+  const { users } = useContext(regContext);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
   const [eye, setEye] = useState("nf-fa-eye");
-  const [_,setCurr] = useLocalStorage(
-    "whoami",
-    null
-  );
 
   function handleVpwd() {
     setVpwd(() => {
@@ -32,27 +28,34 @@ export default function Login() {
     e.preventDefault();
     // destructure Array
     const [email, pwd] = e.target;
-    
+
     const emailIdx = users.findIndex((user) => {
       return user.email === email.value;
     });
+    console.log(users[emailIdx]);
 
     if (emailIdx === -1) {
       setEmailErr("Email tidak terdaftar")
       setPwdErr(null);
     } else {
       setEmailErr(null);
-      
-      if (users[emailIdx].pwd !== pwd.value) {
-        setPwdErr("Password tidak cocok");
+
+      if (pwd.value == "") {
+        setPwdErr("Field password kosong");
       } else {
-        setPwdErr(null);
-        // dispatch(addUser(users[emailIdx]));
-        setCurr({
-          email: email.value,
-          pwd: pwd.value
-        });
-        navigate('/');
+        if (users[emailIdx].pwd !== pwd.value) {
+          setPwdErr("Password tidak cocok");
+        } else {
+          setPwdErr(null);
+
+          dispatch(addUser(email.value));
+          // setCurr({
+          //   email: email.value,
+          // });
+
+          // login(email.value);
+          navigate('/');
+        }
       }
     }
   }
@@ -62,7 +65,7 @@ export default function Login() {
       <div className="bg-[url(/avenger-bg.png)] bg-center bg-zinc-800 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen text-sm">
         <div className="d-flex justify-center">
           <div className="logo">
-            <img src="tickitz-logo.png" width="192" alt="" />
+            <img src="/tickitz-logo.png" width="192" alt="" />
           </div>
         </div>
         <div className="card bg-white flex gap-[1rem] flex-col justify-between rounded-md p-[2rem] w-[384px]">
@@ -74,14 +77,14 @@ export default function Login() {
           <form className="reg flex flex-col gap-[.5rem]" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="email">Email</label>
-              <input className="text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="" id="email"
+              <input className="placeholder:text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="" id="email"
                 placeholder="Enter your email" />
               <p id="erremail" className="text-red-800 text-xs">{emailErr}</p>
             </div>
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="pwd">Password</label>
               <div className="pwd relative flex items-end">
-                <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="" id="pwd"
+                <input className="w-full placeholder:text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="" id="pwd"
                   placeholder="Enter your password" />
                 <i onClick={handleVpwd}
                   className={`nf ${eye} absolute right-0 pe-[.875rem] 
@@ -89,11 +92,17 @@ export default function Login() {
               </div>
               <p id="errpwd" className="text-red-800 text-xs">{pwdErr}</p>
             </div>
-            <Link className="text-[#1D4ED8] text-end 
-              cursor-pointer underline"
+            <Link className="text-[#1D4ED8] self-end 
+              cursor-pointer underline w-max"
               to='/auth/register'
             >
               Sign Up
+            </Link>
+            <Link className="text-[#1D4ED8] self-end 
+              cursor-pointer underline w-max"
+              to='/auth/forget'
+            >
+              Forgot your password?
             </Link>
             <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] 
             py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer"
@@ -120,3 +129,5 @@ export default function Login() {
     </Fragment>
   )
 }
+
+export default Login;
