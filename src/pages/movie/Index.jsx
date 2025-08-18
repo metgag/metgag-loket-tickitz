@@ -1,16 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import MovieCard from '../../components/MovieCard.jsx'
 import ChooseItem from '../../components/ChooseItem.jsx'
 import Subscription from '../../components/Subscription.jsx'
 import { format } from 'date-fns'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { getDiscoverMovie, getGenres, getMovie } from '../../redux/slices/movieSlice.js'
+import toGenre from '../../utils/toGenre.js'
 
 export default function Index() {
-  const movieState = useSelector((state) => state.movies.movies);
+  // const movieState = useSelector((state) => state.movies.movies);
+  const { movies, genres } = useSelector((state) => state.tmdb);
   const [sliceLen, setSliceLen] = useState([0, 4]);
+  const dispatch = useDispatch();
   // const [movies, setMovies] = useState([]);
 
-  const { movies } = movieState;
+  useEffect(() => { dispatch(getDiscoverMovie({genre: [99, 10751]})); }, [dispatch]);
+  useEffect(() => { dispatch(getGenres()); }, [dispatch])
+
+  // const { movies } = movieState;
   const whyChoose = [
     { title: "Guaranteed", img: "/icon/shield-done.svg" },
     { title: "Affordable", img: "/icon/check-circle.svg" },
@@ -132,7 +139,11 @@ export default function Index() {
         <div className="movies flex gap-4 px">
           {movies.slice(0, 4).map((movie, i) => {
             return <MovieCard key={i} title={movie.title}
-              poster={movie.poster_path} genres={movie.genres} />
+              poster={movie.poster_path}
+              genre={movie.genre_ids.map((e) => {
+                return toGenre(e, genres);
+              })}
+            />
           })}
         </div>
         <div
@@ -157,8 +168,10 @@ export default function Index() {
         <div className="movies flex gap-4 self-center">
           {movies.slice(sliceLen[0], sliceLen[1]).map((movie, i) => {
             return <MovieCard key={i} title={movie.title}
-              poster={movie.poster_path} genres={movie.genres}
-              release={format(new Date(movie.release_date), "MMMM yyyy")} />
+              poster={movie.poster_path}
+              // genres={movie.genres}
+              release={format(new Date(movie.release_date), "MMMM yyyy")} 
+              />
           })}
         </div>
       </section>
