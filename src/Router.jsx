@@ -12,6 +12,7 @@ import Ticket from './pages/payment/Ticket.jsx'
 import Profile from './pages/profile/Profile.jsx'
 import Table from './pages/admin/Table.jsx'
 import Chart from './pages/admin/Chart.jsx'
+import Forget from './pages/auth/Forget.jsx'
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
         <Route path="auth">
           <Route path="register" element={<Register />} />
           <Route path="login" element={<Login />} />
+          <Route path="forget" element={<Forget />} />
         </Route>
 
         <Route index element={(
