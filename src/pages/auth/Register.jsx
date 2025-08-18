@@ -1,21 +1,17 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import Step from '../../components/Step'
-import { addUser } from '../../redux/slices/authSlice'
-import { useDispatch } from 'react-redux'
-import { fetchMovie } from '../../redux/slices/movieSlice'
+import { regContext as RegContext } from '../../context/users/regContext';
+import useLocalStorage from '../../hooks/useLocalStorage';
 
-export default function Register() {
-  const dispatch = useDispatch();
+function Register() {
   const [eye, setEye] = useState("nf-fa-eye");
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
   const navigate = useNavigate();
-
-  useEffect(() => {
-    dispatch(fetchMovie());
-  }, [dispatch]);
+  const { addUsr } = useContext(RegContext);
+  const [lclUsers, setLclUsers] = useLocalStorage("users", []);
 
   const stepItem = [
     { how: "Fill Form", bg: "#1D4ED8", color: "#4E4B66" },
@@ -75,7 +71,7 @@ export default function Register() {
         } else {
           setPwdErr("");
           Object.assign(storeForm, {
-            password: pwd.value
+            pwd: pwd.value
           });
           isPwd = true;
         }
@@ -83,11 +79,14 @@ export default function Register() {
     }
 
     if (isEmail && isPwd) {
-      dispatch(addUser({
-        email: email.value,
-        pwd: pwd.value
-      }));
-      // localStorage.setItem("user", JSON.stringify(storeForm));
+      addUsr(storeForm);
+
+      // dispatch(addUser({
+      //   email: email.value,
+      //   pwd: pwd.value
+      // }));
+
+      setLclUsers([...lclUsers, storeForm]);
       navigate("/auth/login");
     }
   }
@@ -99,7 +98,7 @@ export default function Register() {
         bg-cover w-screen h-screen text-sm">
         <div className="d-flex justify-center">
           <div className="logo">
-            <img src="tickitz-logo.png" width="192" alt="" />
+            <img src="/tickitz-logo.png" width="192" alt="" />
           </div>
         </div>
         <div className="card bg-white flex gap-[1rem] flex-col justify-between 
@@ -116,7 +115,7 @@ export default function Register() {
           >
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="email">Email</label>
-              <input className="text-[#A0A3BD] rounded-[3px] p-3 ps-4 border 
+              <input className="placeholder:text-[#A0A3BD] rounded-[3px] p-3 ps-4 border 
               border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="email" id="email"
                 placeholder="Enter your email" />
               <p id="erremail" className="text-red-800 text-xs font-semibold">{emailErr}</p>
@@ -124,7 +123,7 @@ export default function Register() {
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="pwd">Password</label>
               <div className="pwd relative flex items-end">
-                <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 
+                <input className="w-full placeholder:text-[#A0A3BD] rounded-[3px] p-3 ps-4 
                 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="pwd" id="pwd"
                   placeholder="Enter your password" />
                 <i onClick={handleVpwd} className={`nf ${eye} absolute right-0 
@@ -133,7 +132,7 @@ export default function Register() {
               <p id="errpwd" className="text-red-800 text-xs font-semibold">{pwdErr}</p>
             </div>
             <div className="flex items-center">
-              <input required className="me-[12px] accent-[#1D4ED8]" type="checkbox" name="" id="terms" />
+              <input className="me-[12px] accent-[#1D4ED8]" type="checkbox" name="" id="terms" />
               <label className="text-[#696F79]" htmlFor="terms">I agree to terms & condition</label>
             </div>
             <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] 
@@ -141,7 +140,7 @@ export default function Register() {
               Now</button>
             <p id="already" className="mx-auto font-medium text-[#696F79]">
               Already have an account?
-              <Link className="text-[#1D4ED8] underline"
+              <Link className="text-[#1D4ED8] ms-1 underline"
                 to="/auth/login"
               >
                 Login
@@ -169,3 +168,5 @@ export default function Register() {
     </Fragment>
   )
 }
+
+export default Register;
