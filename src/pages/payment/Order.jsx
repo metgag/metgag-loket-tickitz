@@ -1,17 +1,70 @@
-import { useContext, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { orderContext as OrderContext } from '../../context/order/orderContext';
-import { format } from 'date-fns';
-import { addSeat } from '../../redux/slices/detailSlice';
+// import { addSeat } from '../../redux/slices/detailSlice';
+import { convertTime } from '../../utils/convertTime';
+import { format, parseISO } from 'date-fns';
+import { bookTicket } from '../../redux/slices/orderSlice';
 
 function Order() {
-  const { schedule } = useSelector((state) => state.currDetail);
+  // const { schedule } = useSelector((state) => state.currDetail);
   const dispatch = useDispatch();
-  const { movie } = useSelector((state) => state.currDetail);
+  // const { movie } = useSelector((state) => state.currDetail);
   const [seat, setSeat] = useState([]);
   const navigate = useNavigate();
-  const { mkOrder, currOrder } = useContext(OrderContext);
+  // const { mkOrder, currOrder } = useContext(OrderContext);
+  const { order } = useSelector((state => state));
+  const { token } = useSelector((state) => state.auth);
+  const [movieDetail, setMovieDetail] = useState({
+    title: "",
+    backdrop_path: "",
+    genres: [],
+  });
+  const [cinemaAndTime, setCinemaAndTime] = useState({
+    cinemaName: "",
+    time: "",
+    cinemaImg: "",
+  });
+
+  useEffect(() => {
+    if (!order.scheduleId) return;
+
+    const url = `${import.meta.env.VITE_BASE_API_URL}/cinemas/${order.scheduleId}/selected`;
+
+    fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token.token}` },
+    })
+      .then((resp) => {
+        if (!resp.ok) throw new Error(resp.statusText);
+        return resp.json();
+      })
+      .then((res) => {
+        const {
+          cinema_name: cinemaName, time, cinema_img: cinemaImg
+        } = res.result;
+        setCinemaAndTime({ cinemaName, time: convertTime(time), cinemaImg });
+      })
+      .catch((err) => console.error("Fetch cinemaAndTime error:", err));
+  }, [order.scheduleId, token]);
+
+  useEffect(() => {
+    if (!order.movieId) return;
+
+    const url = `${import.meta.env.VITE_BASE_API_URL}/movies/${order.movieId}`;
+
+    fetch(url)
+      .then((resp) => {
+        if (!resp.ok) throw new Error(resp.statusText);
+        return resp.json();
+      })
+      .then((res) => {
+        const { backdrop_path, genres, title } = res.result;
+        setMovieDetail({ title, backdrop_path, genres });
+      })
+      .catch((err) => console.error("Fetch movieDetail error:", err));
+  }, [order.movieId]);
 
   const btnBlu = "btn-change h-min px-5 py-1 self-end rounded-md bg-[#1D4ED8] text-white font-medium hover:opacity-[.8] hover:cursor-pointer";
   const hBlk = "text-[#14142B] text-2xl font-semibold";
@@ -27,7 +80,7 @@ function Order() {
       }
     }
     return result;
-  }
+  };
 
   return (
     <main className="bg-[#ECEDF2] py-20 px-6 md:px-0">
@@ -39,18 +92,24 @@ function Order() {
         <div className="flex shadow-sm flex-col gap-6 bg-white p-6 md:p-4 py-6 rounded-lg">
           <div className="movie-detail flex border p-4 gap-4 border-[#DEDEDE] rounded-md">
             <img
-              src={`${import.meta.env.VITE_POSTER_URL}${movie.backdrop_path}`}
+              src={`${import.meta.env.VITE_BASE_API_URL}/backdrop/${movieDetail.backdrop_path}`}
               className="object-cover rounded-sm h-28 w-48" />
             <div className="detail flex flex-col justify-between">
-              <h3 className={hBlk}>{movie.title.length > 16 ?
-                `${movie.title.slice(0, 14)}...` :
-                `${movie.title}`
+              <h3 className={hBlk}>{movieDetail.title.length > 24 ?
+                `${movieDetail.title.slice(0, 26)}...` :
+                `${movieDetail.title}`
               }</h3>
               <div className="genre flex flex-wrap gap-2">
-                <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Action</p>
-                <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Adventure</p>
+                {movieDetail.genres.map((e) => {
+                  return <p
+                    key={e.id}
+                    className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>{e.name}</p>
+                })}
+                {/* <p className='bg-[#A0A3BD1A] text-[#A0A3BD] px-2 rounded-full'>Adventure</p> */}
               </div>
-              <p>{`Regular - ${schedule.time}`}</p>
+              {cinemaAndTime.time &&
+                <p>{`Regular - ${cinemaAndTime.time}`}</p>
+              }
             </div>
             <button
               className={`${btnBlu} ms-auto`}
@@ -153,29 +212,29 @@ function Order() {
         <aside className="flex flex-col h-min gap-8 min-w-sm">
           <div className="cinema bg-white flex p-6 py-6 flex-col gap-6 rounded-lg shadow-md">
             <div className="cinema-name flex flex-col items-center gap-2">
-              <img src={`/sponsor/${schedule.cinema}.svg`} alt=""
+              <img src={cinemaAndTime.cinemaImg} alt=""
                 className='w-42'
               />
               <h3 className={`${hBlk}`}>
-                CineOne21 Cinema
+                {cinemaAndTime.cinemaName}
               </h3>
             </div>
             <div className="details flex flex-col gap-3">
               <div className="title flex justify-between gap-[1.5rem]">
                 <p className="text-[#6B6B6B]">Movie Selected</p>
                 <p className="text-[#14142B] font-semibold">
-                  {movie.title.length > 22 ?
-                    `${movie.title.slice(0, 20)}...` :
-                    `${movie.title}`
+                  {movieDetail.title.length > 22 ?
+                    `${movieDetail.title.slice(0, 20)}...` :
+                    `${movieDetail.title}`
                   }
                 </p>
               </div>
               <div className="date flex justify-between gap-[1.5rem]">
                 <p className="text-[#6B6B6B]">
-                  {format(schedule.date, "EEEE, dd LLLL yyyy")}
+                  {format(parseISO(order.date), "EEEE, dd LLLL yyyy")}
                 </p>
                 <p className="text-[#14142B] font-semibold">
-                  {schedule.time.replaceAll(" ", "").toLowerCase()}
+                  {cinemaAndTime.time}
                 </p>
               </div>
               <div className="price flex justify-between gap-[1.5rem]">
@@ -206,10 +265,18 @@ function Order() {
           </div>
           <button
             onClick={() => {
+              if (seat.length > 0) {
+                dispatch(bookTicket({
+                  seats: seat,
+                  selectedCinema: cinemaAndTime,
+                  selectedMovie: movieDetail,
+                }));
+                navigate("/movie/payment");
+              }
               // dispatch(addOrderDetail({ ...orderDetail, seat }));
-              dispatch(addSeat(seat));
-              mkOrder({ ...currOrder, seat});
-              navigate("/movie/payment")
+              // dispatch(addSeat(seat));
+              // mkOrder({ ...currOrder, seat});
+              // navigate("/movie/payment")
             }}
             className={`${btnBlu} w-full py-3 shadow-lg rounded-sm`}>
             Checkout now

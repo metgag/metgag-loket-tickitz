@@ -1,27 +1,30 @@
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useSelector } from "react-redux";
-import { useContext, useEffect } from "react";
 import { historyContext as HistoryContext } from "../../context/history/historyContext";
 import { orderContext as OrderContext } from "../../context/order/orderContext";
-import useLocalStorage from "../../hooks/useLocalStorage";
 
 function Ticket() {
-  const { movie, schedule, seat } = useSelector((state) => state.currDetail);
-  const { addHistoryContext } = useContext(HistoryContext);
-  const { currOrder } = useContext(OrderContext)
-  const [lclHistory, setLclHistory] = useLocalStorage("history", []);
+  const { selectedMovie, selectedCinema, seats, date: scheduleDate } = useSelector((state) => state.order);
+  // const { movie, schedule, seat } = useSelector((state) => state.currDetail);
+  // const { history, addHistory } = useContext(HistoryContext);
+  // const { currOrder } = useContext(OrderContext)
+  // const [_, setLocalHistory] = useLocalStorage("history", []);
 
-  useEffect(() => {
-    addHistoryContext(currOrder);
-  }, []);
+  // useEffect(() => {
+  //   addHistory(currOrder);
+  // }, [currOrder]);
+
+  // useEffect(() => {
+  //   setLocalHistory(history);
+  // }, [history]);
 
   const items = [
-    { title: "Movie", content: `${movie.title.slice(0, 11)}...` },
+    { title: "Movie", content: `${selectedMovie.title.slice(0, 11)}...` },
     { title: "Category", content: "PG-13" },
-    { title: "Date", content: `${format(schedule.date, "dd LLL")}` },
-    { title: "Time", content: `${schedule.time.toLowerCase()}` },
-    { title: "Count", content: `${seat.length}pcs` },
-    { title: "Seats", content: `${seat.join(", ").slice(0, 12)}...` },
+    { title: "Date", content: `${format(parseISO(scheduleDate), "dd LLL")}` },
+    { title: "Time", content: `${selectedCinema.time.toLowerCase()}` },
+    { title: "Count", content: `${seats.length}pcs` },
+    { title: "Seats", content: `${seats.join(", ").slice(0, 12)}...` },
   ];
 
   return (
@@ -60,7 +63,7 @@ function Ticket() {
             <div className="item col-span-2">
               <div className="flex justify-between rounded-sm items-center px-6 py-2 border border-[#DEDEDE]">
                 <p>Total</p><p className="font-semibold text-lg">
-                  {`$${seat.length * 10}.00`}
+                  {`$${seats.length * 10}.00`}
                 </p>
               </div>
             </div>

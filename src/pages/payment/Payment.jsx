@@ -1,36 +1,71 @@
 import PaymOutput from '../../components/PaymOutput'
 import InputItem from '../../components/InputItem'
 import PaymMethod from '../../components/PaymMethod'
-// import Step from '../../components/Step'
-import { useDispatch, useSelector } from 'react-redux';
-// import { addToStore, getDetail } from '../../redux/slices/detailSlice';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { format, set } from 'date-fns';
-import { useContext, useState } from 'react';
+// import { format, set } from 'date-fns';
+import { useEffect, useState } from 'react';
 import { orderContext as OrderContext } from '../../context/order/orderContext';
 import { historyContext as HistoryContext } from '../../context/history/historyContext';
-import { addInfo } from '../../redux/slices/personalSlice';
-import { addHistory } from '../../redux/slices/historySlice';
-import useLocalStorage from '../../hooks/useLocalStorage';
+// import useLocalStorage from '../../hooks/useLocalStorage';
+import { getIdFromPos } from '../../utils/convSeat';
 
 function Payment() {
-  const { schedule, movie, seat } = useSelector((state) => state.currDetail);
+  const { selectedCinema, selectedMovie, seats, date } = useSelector((state) => state.order);
   const [pop, setPop] = useState(false);
-  const { email } = useSelector((state) => state.whoami);
+  const { token, email } = useSelector((state) => state.auth);
+  const { scheduleId } = useSelector((state) => state.order)
+  // const { email } = useSelector((state) => state.whoami);
   // const { mkOrder, currOrder } = useContext(OrderContext);
-  const dispatch = useDispatch();
+  const [fullName, setFullName] = useState("");
+  const [phoneNum, setPhoneNum] = useState("");
+  const [paymentBody, setPaymentBody] = useState({
+    schedule_id: scheduleId,
+    payment_method: "",
+    total: seats.length * 10,
+    is_paid: false,
+    seats: seats.map((e) => getIdFromPos(e)),
+  });
   // const { userInfo } = useSelector((state) => state);
 
+  useEffect(() => {
+    const url = `${import.meta.env.VITE_BASE_API_URL}/users/`;
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token.token}`,
+      },
+    };
+
+    const request = new Request(url, options);
+    fetch(request)
+      .then((resp) => {
+        if (!resp.ok) throw resp.statusText;
+        return resp.json();
+      })
+      .then(res => {
+        console.log(res.result)
+        const { first_name, last_name, phone_number } = res.result;
+        if (first_name && last_name) {
+          setFullName(`${first_name} ${last_name}`);
+        }
+        if (phone_number) {
+          setPhoneNum(phone_number);
+        }
+      })
+      .catch(err => console.log(err));
+  }, [token.token]);
+
   const paymResult = [
-    { head: "DATE & TIME", content: `${format(schedule.date, "EEEE, dd LLLL yyyy")} at ${schedule.time.replaceAll(" ", "").toLowerCase()}` },
-    { head: "MOVIE TITLE", content: `${movie.title}` },
-    { head: "CINEMA NAME", content: "CineOne21 Cinema" },
-    { head: "NUMBER OF TICKETS", content: `${seat.length} pcs` },
+    { head: "DATE & TIME", content: `${date} at ${selectedCinema.time}` },
+    { head: "MOVIE TITLE", content: `${selectedMovie.title}` },
+    { head: "CINEMA NAME", content: `${selectedCinema.cinemaName}` },
+    { head: "NUMBER OF TICKETS", content: `${seats.length} pcs` },
   ];
   const formItems = [
-    { label: "Full Name", id: "fname", type: "text" },
+    { label: "Full Name", id: "fname", type: "text", value: fullName },
     { label: "Email", id: "email", type: "email", value: email },
-    { label: "Phone Number", id: "pnumber", type: "text" },
+    { label: "Phone Number", id: "pnumber", type: "text", value: phoneNum },
   ];
   const paymMethod = [
     "gpay",
@@ -52,9 +87,13 @@ function Payment() {
       if (i === 3) {
         for (const method of e.target.method) {
           if (method.checked) {
-            Object.assign(info, {
-              method: method.id
-            });
+            setPaymentBody((prev) => ({
+              ...prev,
+              payment_method: method.id,
+            }));
+            // Object.assign(info, {
+            //   method: method.id
+            // });
           }
         }
         continue;
@@ -64,12 +103,12 @@ function Payment() {
         [form[i].id]: form[i].value
       });
     }
-    // console.log(info);
 
-    dispatch(addInfo({
-      fname: info.fname,
-      pnumber: info.pnumber
-    }));
+    // dispatch(addInfo({
+    //   fname: info.fname,
+    //   pnumber: info.pnumber
+    // }));
+
     // dispatch(addHistory())
     // mkOrder({ ...currOrder, info });
     // console.log(info);
@@ -95,7 +134,7 @@ function Payment() {
               <div className="total flex flex-col">
                 <h5>TOTAL PAYMENT</h5>
                 <p className="text-[#1D4ED8] font-bold">
-                  {`$${seat.length * 10},00`}
+                  {`$${seats.length * 10},00`}
                 </p>
               </div>
             </div>
@@ -128,19 +167,42 @@ function Payment() {
         </div>
       </section>
 
-      <Modal pop={pop} onClose={() => setPop(!pop)} />
+      <Modal pop={pop} onClose={() => setPop(!pop)} setPaymentBody={setPaymentBody} paymentBody={paymentBody} />
 
     </main>
   )
 }
 
-function Modal({ pop, onClose }) {
+function Modal({ pop, paymentBody, setPaymentBody }) {
   const navigate = useNavigate();
-  const { schedule } = useSelector((state) => state.currDetail);
-  const { currOrder, mkOrder } = useContext(OrderContext)
+  const { token } = useSelector((state) => state.auth);
+  // const { scheduleId } = useSelector((state) => state.order);
+  // const { currOrder, mkOrder } = useContext(OrderContext)
+  // const { history, addHistory } = useContext(HistoryContext);
 
-  const endPaym = parseInt(schedule.date.split("-")[2]) + 2;
-  const endDate = set(new Date(schedule.date), { date: endPaym })
+  function handlePayment() {
+    const url = `${import.meta.env.VITE_BASE_API_URL}/orders`;
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.token}`,
+      },
+    };
+
+    const request = new Request(url, options);
+    fetch(request, {
+      body: JSON.stringify(paymentBody),
+    })
+      .then((resp) => {
+        if (!resp.ok) throw resp.statusText;
+        return resp.json();
+      })
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  }
+
+  // const endPaym = parseInt(schedule.date.split("-")[2]) + 2;
+  // const endDate = set(new Date(schedule.date), { date: endPaym })
 
   return (
     <div className={`paym-info flex flex-col w-9/10 absolute z-9998 md:w-3/10 h-min self-center bg-white rounded-xl p-6 gap-7 shadow-xl transition-all
@@ -165,13 +227,21 @@ function Modal({ pop, onClose }) {
         <p className='text-[#8692A6] text-sm'>Total Payment</p>
         <h4 className='text-[#1d4ed8] text-xl font-bold mt-3 md:mt-0'>$30</h4>
       </div>
-      <p className='text-[#8692A6] text-justify'>Pay this payment bill before it is due, <span className='text-[#D00707] font-medium'>on {format(endDate, "LLLL dd, yyyy")}</span>. If the bill has not been paid by the
+      <p className='text-[#8692A6] text-justify'>Pay this payment bill before it is due, <span className='text-[#D00707] font-medium'>
+        {/* on {format(endDate, "LLLL dd, yyyy")} */}
+      </span>. If the bill has not been paid by the
         specified
-        time, it will be forfeited</p>
+        time, it will be forfeited
+      </p>
       <div className="btn flex items-center text-center flex-col gap-2.5 mb-8">
         <button className='w-full py-3.5 text-white bg-[#1d4ed8] rounded-md font-bold shadow-lg cursor-pointer hover:opacity-90'
           onClick={() => {
-            mkOrder({ ...currOrder, isPaid: true });
+            setPaymentBody((prev) => ({
+              ...prev,
+              is_paid: true,
+            }));
+            handlePayment();
+            // mkOrder({ ...currOrder, isPaid: true });
 
             navigate("/movie/ticket");
             // rmOrder();
@@ -181,7 +251,8 @@ function Modal({ pop, onClose }) {
         </button>
         <button id="pay-later"
           onClick={() => {
-            mkOrder({ ...currOrder, isPaid: false });
+            handlePayment();
+            // mkOrder({ ...currOrder, isPaid: false });
 
             navigate("/movie/ticket");
             // rmOrder();
