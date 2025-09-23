@@ -2,9 +2,9 @@ import { Fragment, useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import Subscription from '../../components/Subscription'
 import { useDispatch, useSelector } from 'react-redux';
-import { getDiscoverMovie, getGenres, getSearch } from '../../redux/slices/movieSlice';
-import toGenre from '../../utils/toGenre';
-import { getCredit, getDetail } from '../../redux/slices/detailSlice';
+import { getFilter, getGenres } from '../../redux/slices/movieSlice';
+// import toGenre from '../../utils/toGenre';
+// import { getCredit, getDetail } from '../../redux/slices/detailSlice';
 // import { movieActions } from '../../redux/slices/movieSlice';
 
 export default function Movies() {
@@ -12,39 +12,69 @@ export default function Movies() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [pageNm, setPageNm] = useState([1, 2, 3, 4, 5]);
-  const [searchParams, setSearchParams] = useSearchParams("");
+  const [searchParams, setSearchParams] = useSearchParams();
   const currPage = searchParams.get("page") || 1;
   const currGenre = searchParams.get("genre") || "";
   const [currQuery, setQuery] = useState("");
+  const [genreStyle,] = useState("text-black bg-none");
+
+  useEffect(() => {
+    const params = {};
+    let queryArgs = { page: currPage }; // always include page
+
+    if (currQuery) {
+      params.q = currQuery;
+      queryArgs.q = currQuery;
+    }
+
+    if (currGenre) {
+      params.genre = currGenre;
+      queryArgs.genre = currGenre;
+    }
+
+    // add page param only if no query & no genre (clean URLs for search/filter)
+    if (!currQuery && !currGenre) {
+      params.page = currPage;
+    }
+
+    // reset case
+    if (currPage == 1 && !currQuery && !currGenre) {
+      setSearchParams("");
+    } else {
+      setSearchParams(params);
+    }
+
+    dispatch(getFilter(queryArgs));
+  }, [currPage, currQuery, currGenre, dispatch, setSearchParams]);
 
   // reset if there is no search params
-  useEffect(() => {
-    if (!currQuery &&
-      !currGenre &&
-      !currPage) setSearchParams("");
-  },
-    [currGenre, currPage, currQuery, setSearchParams]);
+  // useEffect(() => {
+  //   if (!currQuery &&
+  //     !currGenre &&
+  //     !currPage) setSearchParams("");
+  // },
+  //   [currGenre, currPage, currQuery, setSearchParams]);
 
   useEffect(() => { dispatch(getGenres()); }, [dispatch]);
 
-  useEffect(() => {
-    if (!currQuery) {
-      dispatch(getDiscoverMovie({
-        page: currPage, genre: currGenre
-      }));
-    }
-  }, [currGenre, currPage, currQuery, dispatch]);
+  // useEffect(() => {
+  //   if (!currQuery) {
+  //     dispatch(getDiscoverMovie({
+  //       page: currPage, genre: currGenre
+  //     }));
+  //   }
+  // }, [currGenre, currPage, currQuery, dispatch]);
 
-  useEffect(() => {
-    if (currQuery) {
-      dispatch(getSearch(currQuery));
-      setSearchParams({ query: currQuery });
-      if (currPage) {
-        dispatch(getSearch({ query: currQuery, page: currPage }));
-        setSearchParams({ query: currQuery, page: currPage })
-      }
-    }
-  }, [currPage, currQuery, dispatch, setSearchParams]);
+  // useEffect(() => {
+  //   if (currQuery) {
+  //     dispatch(getSearch(currQuery));
+  //     setSearchParams({ query: currQuery });
+  //     if (currPage) {
+  //       dispatch(getSearch({ query: currQuery, page: currPage }));
+  //       setSearchParams({ query: currQuery, page: currPage })
+  //     }
+  //   }
+  // }, [currPage, currQuery, dispatch, setSearchParams]);
 
   return (
     <main className="flex flex-col">
@@ -71,7 +101,11 @@ export default function Movies() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              setQuery(e.target.search.value);
+              if (e.target.search.value) {
+                setQuery(e.target.search.value);
+              } else {
+                setQuery("")
+              }
             }}
             className='flex flex-col gap-4'>
             <label htmlFor="find" className='text-[#4E4B66] w-max'>
@@ -81,7 +115,8 @@ export default function Movies() {
               <input type="text" name="search" id="find"
                 placeholder="New Born Expert"
                 className='p-3 border border-[#DEDEDE] rounded-sm 
-              placeholder:text-[#A0A3BD]' />
+              placeholder:text-[#A0A3BD]'
+              />
               <button className='absolute right-0 text-[#a0a3bd] h-full w-12 flex items-center justify-center cursor-pointer hover:opacity-65'
               >
                 <i className="nf nf-fa-search"></i>
@@ -100,11 +135,11 @@ export default function Movies() {
                         className="hidden"
                       />
                       <label htmlFor={id}
-                        onClick={() => {
+                        onClick={(e) => {
                           if (currQuery) setQuery("");
-                          setSearchParams({ genre: id });
+                          setSearchParams({ genre: name.toLowerCase() });
                         }}
-                        className={`p-2 px-3 hover:bg-[#1D4ED8] hover:cursor-pointer hover:text-white rounded-xl`}
+                        className={`p-2 px-3 hover:bg-[#1D4ED8] hover:cursor-pointer hover:text-white rounded-xl ${genreStyle}`}
                       >
                         {name}
                       </label>
@@ -124,8 +159,8 @@ export default function Movies() {
           </form>
         </section>
 
-        <section id="watch-today" 
-        className="flex px-8 md:px-28 flex-col items-center">
+        <section id="watch-today"
+          className="flex px-8 md:px-28 flex-col items-center">
           <div className="movies-grid grid grid-cols-2 md:grid-cols-4 gap-8">
             {movies &&
               movies
@@ -140,7 +175,8 @@ export default function Movies() {
                           }}
                           className="hover:opacity-[.8] rounded-md aspect-3/5 object-cover cursor-pointer"
                           src={`${movie.poster_path ?
-                            `https://image.tmdb.org/t/p/w500${movie.poster_path}` :
+                            `${import.meta.env.VITE_BASE_API_URL}/poster/${movie.poster_path}`
+                            :
                             `https://upload.wikimedia.org/wikipedia/commons/8/8d/ERR0R_NO_IMAGE_FOUND.jpg`
                             }`}
                           alt=""
@@ -158,11 +194,11 @@ export default function Movies() {
                         {movie.title}
                       </h4>
                       <div className="genre flex flex-wrap gap-3">
-                        {movie.genre_ids.map((genre, id) => {
-                          return <p key={id} className='px-3 rounded-full 
-                      text-[#A0A3BD] bg-[#A0A3BD1A]'>
-                            {toGenre(genre, genres)}
-                          </p>
+                        {movie.genres.map((e) => {
+                          return <p
+                            key={e.id}
+                            className='px-3 rounded-full text-[#A0A3BD] bg-[#A0A3BD1A]'
+                          >{e.name}</p>
                         })}
                       </div>
                     </div>
