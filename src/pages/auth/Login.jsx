@@ -1,17 +1,20 @@
-import { Fragment, useContext, useState } from 'react'
+// import { Fragment, useContext, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
-import { addUser } from '../../redux/slices/loginSlice';
-import { regContext } from '../../context/users/regContext';
+// import { addUser } from '../../redux/slices/loginSlice';
+import { useState } from 'react';
+import { login } from '../../redux/slices/tokenSlice';
+// import { date } from 'zod';
 
 function Login() {
-  const { users } = useContext(regContext);
+  // const { users } = useContext(regContext);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [emailErr, setEmailErr] = useState("");
-  const [pwdErr, setPwdErr] = useState("");
+  const [emailErr, ] = useState("");
+  const [pwdErr, ] = useState("");
   const [vpwd, setVpwd] = useState("password");
   const [eye, setEye] = useState("nf-fa-eye");
+  // const [token, setToken] = useState("");
 
   function handleVpwd() {
     setVpwd(() => {
@@ -28,40 +31,84 @@ function Login() {
     e.preventDefault();
     // destructure Array
     const [email, pwd] = e.target;
+    const body = {
+      email: email.value,
+      password: pwd.value,
+    };
 
-    const emailIdx = users.findIndex((user) => {
-      return user.email === email.value;
-    });
-    console.log(users[emailIdx]);
+    const url = `${import.meta.env.VITE_BASE_API_URL}/auth/login`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    const request = new Request(url, options)
 
-    if (emailIdx === -1) {
-      setEmailErr("Email tidak terdaftar")
-      setPwdErr(null);
-    } else {
-      setEmailErr(null);
+    fetch(request, {
+      body: JSON.stringify(body)
+    })
+      .then((res) => {
+        if (!res.ok) throw res.statusText;
+        return res.json()
+      })
+      .then(dat => {
+        if (dat.success) {
+          console.log(dat);
+          dispatch(login({
+            uid: parseInt(dat.message),
+            token: dat.token,
+          }));
+          // const decoded = decodeJWT(dat.token)
+          // const expTime = decoded.exp * 1000;
+          // const currentTime = Date.now();
+          // const timeRemain = expTime - currentTime;
 
-      if (pwd.value == "") {
-        setPwdErr("Field password kosong");
-      } else {
-        if (users[emailIdx].pwd !== pwd.value) {
-          setPwdErr("Password tidak cocok");
-        } else {
-          setPwdErr(null);
+          // console.log(`token expires in ${timeRemain / 1000} seconds`);
 
-          dispatch(addUser(email.value));
-          // setCurr({
-          //   email: email.value,
-          // });
+          // setTimeout(() => {
+          //   console.log("token expired. Logging out.....");
+          //   navigate("/auth/login");
+          // }, timeRemain);
 
-          // login(email.value);
-          navigate('/');
+          // setToken(dat.token);
+          navigate("/");
         }
-      }
-    }
+      })
+      .catch(err => console.log(err));
+
+    // const emailIdx = users.findIndex((user) => {
+    //   return user.email === email.value;
+    // });
+
+    // if (emailIdx === -1) {
+    //   setEmailErr("Email tidak terdaftar")
+    //   setPwdErr(null);
+    // } else {
+    //   setEmailErr(null);
+
+    //   if (pwd.value == "") {
+    //     setPwdErr("Field password kosong");
+    //   } else {
+    //     if (users[emailIdx].pwd !== pwd.value) {
+    //       setPwdErr("Password tidak cocok");
+    //     } else {
+    //       setPwdErr(null);
+
+    //       // dispatch(addUser(email.value));
+    //       // setCurr({
+    //       //   email: email.value,
+    //       // });
+
+    //       // login(email.value);
+    //       // navigate('/');
+    //     }
+    //   }
+    // }
   }
 
   return (
-    <Fragment>
+    <>
       <div className="bg-[url(/avenger-bg.png)] bg-center bg-zinc-800 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen text-sm">
         <div className="d-flex justify-center">
           <div className="logo">
@@ -126,8 +173,8 @@ function Login() {
           </div>
         </div>
       </div>
-    </Fragment>
-  )
+    </>
+  );
 }
 
 export default Login;
