@@ -13,6 +13,8 @@ import Profile from './pages/profile/Profile.jsx'
 import Table from './pages/admin/Table.jsx'
 import Chart from './pages/admin/Chart.jsx'
 import Forget from './pages/auth/Forget.jsx'
+import Create from './pages/admin/Create.jsx'
+import { AdminRoute } from './components/AdminRoute.jsx'
 
 function Router() {
   return (
@@ -46,7 +48,12 @@ function Router() {
 
         <Route path="admin" element={<ProfileLayout />}>
           <Route path="chart" element={<Chart />} />
-          <Route path="table" element={<Table />} />
+          <Route path="table" element={
+            <AdminRoute>
+              <Table />
+            </AdminRoute>
+          } />
+          <Route path="create" element={<Create />} />
         </Route>
       </Routes>
     </BrowserRouter>
@@ -60,7 +67,7 @@ function RouteLayout() {
       <Outlet />
       <Footer />
     </>
-  )
+  );
 }
 
 function ProfileLayout() {
@@ -69,7 +76,7 @@ function ProfileLayout() {
       <Navbar />
       <Outlet />
     </>
-  )
+  );
 }
 
 export default Router;
