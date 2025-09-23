@@ -17,7 +17,6 @@ FROM nginx:alpine3.22
 
 COPY --from=builder /app/nginx/nginx.conf /etc/nginx/
 COPY --from=builder /app/nginx/sites-available/app.conf /etc/nginx/sites-available/
-COPY --from=builder /app/nginx/includes/proxy.conf /etc/nginx/includes/proxy.conf
 
 RUN mkdir -p /etc/nginx/sites-enabled
 RUN ln -s /etc/nginx/sites-available/app.conf /etc/nginx/sites-enabled/
