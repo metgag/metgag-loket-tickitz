@@ -1,0 +1,19 @@
+name: Build and push image to ghcr
+on:
+    push:
+        branches:
+            - master
+jobs:
+    build-and-push:
+        runs-on: "ubuntu-22.04"
+        steps:
+            - name: Checking out code
+              uses: actions/checkout@v5
+            - name: Build & pushing image
+              uses: mr-smithers-excellent/docker-build-push@v6
+              with:
+                image: loket
+                tags: fe.v${{ github.run_number }}
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
