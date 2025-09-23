@@ -1,8 +1,5 @@
 name: Build and push image to ghcr
-on:
-    push:
-        branches:
-            - master
+on: [push]
 jobs:
     build-and-push:
         runs-on: "ubuntu-22.04"
