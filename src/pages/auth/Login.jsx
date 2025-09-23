@@ -1,14 +1,26 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useContext, useState } from 'react'
+import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router';
+import { addUser } from '../../redux/slices/loginSlice';
+import { regContext } from '../../context/users/regContext';
 
-export default function Login() {
+function Login() {
+  const { users } = useContext(regContext);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [emailErr, setEmailErr] = useState("");
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
+  const [eye, setEye] = useState("nf-fa-eye");
 
-  function handleVpwd(e) {
+  function handleVpwd() {
     setVpwd(() => {
-      if (vpwd === "password") return "text";
-      else return "password";
+      if (vpwd === "password") {
+        setEye("nf-fa-eye_slash");
+        return "text";
+      }
+      setEye("nf-fa-eye");
+      return "password";
     });
   }
 
@@ -16,45 +28,35 @@ export default function Login() {
     e.preventDefault();
     // destructure Array
     const [email, pwd] = e.target;
-    let [isEmail, isPwd] = [false, false];
 
-    // Validasi Email
-    // field email tidak boleh kosong
-    if (email.value === null || email.value === "") {
-      setEmailErr(() => "Field email tidak boleh kosong");
-    } else {
-      // validasi format email
-      const reMail = /^[\w-.]+@[a-z]{5,}.com$/;
-      if (!reMail.test(email.value)) {
-        setEmailErr(() => "Format email tidak sesuai");
-      } else {
-        setEmailErr("");
-        isEmail = true;
-      }
-    }
+    const emailIdx = users.findIndex((user) => {
+      return user.email === email.value;
+    });
+    console.log(users[emailIdx]);
 
-    // Validasi Password
-    // field password tidak boleh kosong
-    if (pwd.value === null || pwd.value === "") {
-      setPwdErr("Field password tidak boleh kosong");
+    if (emailIdx === -1) {
+      setEmailErr("Email tidak terdaftar")
+      setPwdErr(null);
     } else {
-      // validasi minimal 8 karakter
-      if (pwd.value.length < 8) {
-        setPwdErr("Password minimal 8 karakter");
+      setEmailErr(null);
+
+      if (pwd.value == "") {
+        setPwdErr("Field password kosong");
       } else {
-        // validasi format
-        const rePwd = /^(?=.*[a-z])(?=.+[A-Z])(?=.+[!@#$%^&*/><]).{8,}$/;
-        if (!rePwd.test(pwd.value)) {
-          setPwdErr("Password harus terdiri dari minimal 1 huruf besar dan kecil, dan 1 buah karakter spesial(!@#$%^&*/><)");
+        if (users[emailIdx].pwd !== pwd.value) {
+          setPwdErr("Password tidak cocok");
         } else {
-          setPwdErr("");
-          isPwd = true;
+          setPwdErr(null);
+
+          dispatch(addUser(email.value));
+          // setCurr({
+          //   email: email.value,
+          // });
+
+          // login(email.value);
+          navigate('/');
         }
       }
-    }
-
-    if (isEmail && isPwd) {
-      console.log("Login berhasil");
     }
   }
 
@@ -63,7 +65,7 @@ export default function Login() {
       <div className="bg-[url(/avenger-bg.png)] bg-center bg-zinc-800 bg-blend-overlay flex flex-col items-center justify-center pb-[4rem] bg-cover w-screen h-screen text-sm">
         <div className="d-flex justify-center">
           <div className="logo">
-            <img src="tickitz-logo.png" width="192" alt="" />
+            <img src="/tickitz-logo.png" width="192" alt="" />
           </div>
         </div>
         <div className="card bg-white flex gap-[1rem] flex-col justify-between rounded-md p-[2rem] w-[384px]">
@@ -75,21 +77,36 @@ export default function Login() {
           <form className="reg flex flex-col gap-[.5rem]" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="email">Email</label>
-              <input className="text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="" id="email"
+              <input className="placeholder:text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type="text" name="" id="email"
                 placeholder="Enter your email" />
               <p id="erremail" className="text-red-800 text-xs">{emailErr}</p>
             </div>
             <div className="flex flex-col gap-[.375rem]">
               <label className="gray-primary" htmlFor="pwd">Password</label>
               <div className="pwd relative flex items-end">
-                <input className="w-full text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="" id="pwd"
+                <input className="w-full placeholder:text-[#A0A3BD] rounded-[3px] p-3 ps-4 border border-[#DEDEDE] bg-[#FCFDFE]" type={vpwd} name="" id="pwd"
                   placeholder="Enter your password" />
-                <i onClick={handleVpwd} className="nf nf-fa-eye absolute right-0 pe-[.875rem] translate-y-[-120%] hover:cursor-pointer hover:opacity-[.6]"></i>
+                <i onClick={handleVpwd}
+                  className={`nf ${eye} absolute right-0 pe-[.875rem] 
+                translate-y-[-120%] hover:cursor-pointer hover:opacity-[.6]`}></i>
               </div>
               <p id="errpwd" className="text-red-800 text-xs">{pwdErr}</p>
             </div>
-            <a className="text-[#1D4ED8] text-end hover:opacity-[.6] cursor-pointer">Forgot your password?</a>
-            <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer" type="submit">
+            <Link className="text-[#1D4ED8] self-end 
+              cursor-pointer underline w-max"
+              to='/auth/register'
+            >
+              Sign Up
+            </Link>
+            <Link className="text-[#1D4ED8] self-end 
+              cursor-pointer underline w-max"
+              to='/auth/forget'
+            >
+              Forgot your password?
+            </Link>
+            <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] 
+            py-[.875rem] font-semibold hover:opacity-[.8] cursor-pointer"
+              type="submit">
               Login
             </button>
             <div id="or" className="flex justify-center">
@@ -99,11 +116,11 @@ export default function Login() {
 
           <div id="social" className="flex justify-between">
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="social/google.svg" width="20" alt="" />
+              <img src="/social/google.svg" width="20" alt="" />
               <p>Google</p>
             </button>
             <button className="flex flex-row items-center shadow-md cursor-pointer gap-[12px] p-[12px] bg-white rounded-[4px] w-[8rem] justify-center">
-              <img src="social/fb.png" width="20" />
+              <img src="/social/fb.png" width="20" />
               <p>Facebook</p>
             </button>
           </div>
@@ -112,3 +129,5 @@ export default function Login() {
     </Fragment>
   )
 }
+
+export default Login;
