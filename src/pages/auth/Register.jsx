@@ -1,4 +1,4 @@
-import { Fragment, useContext, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import Step from '../../components/Step'
 import { regContext as RegContext } from '../../context/users/regContext';
@@ -10,8 +10,15 @@ function Register() {
   const [pwdErr, setPwdErr] = useState("");
   const [vpwd, setVpwd] = useState("password");
   const navigate = useNavigate();
-  const { addUsr } = useContext(RegContext);
-  const [lclUsers, setLclUsers] = useLocalStorage("users", []);
+  // const { users, addUser } = useContext(RegContext);
+  // const [_, setLocalUsers] = useLocalStorage("users", []);
+
+  // useEffect(() => {
+  // }, [])
+
+  // useEffect(() => {
+  //   setLocalUsers(users);
+  // }, [setLocalUsers, users]);
 
   const stepItem = [
     { how: "Fill Form", bg: "#1D4ED8", color: "#4E4B66" },
@@ -34,7 +41,7 @@ function Register() {
     e.preventDefault();
     // destructure Array
     const [email, pwd] = e.target;
-    const storeForm = {};
+    const result = {};
     let [isEmail, isPwd] = [false, false];
 
     // Validasi Email
@@ -43,12 +50,12 @@ function Register() {
       setEmailErr(() => "Field email tidak boleh kosong");
     } else {
       // validasi format email
-      const reMail = /^[\w-.]+@[a-z]{5,}.com$/;
+      const reMail = /^[\w-.]+@[a-z]{4,}.com$/;
       if (!reMail.test(email.value)) {
         setEmailErr(() => "Format email tidak sesuai");
       } else {
         setEmailErr("");
-        Object.assign(storeForm, {
+        Object.assign(result, {
           email: email.value
         });
         isEmail = true;
@@ -65,12 +72,13 @@ function Register() {
         setPwdErr("Password minimal 8 karakter");
       } else {
         // validasi format
-        const rePwd = /^(?=.*[a-z])(?=.+[A-Z])(?=.+[!@#$%^&*/><]).{8,}$/;
+        // const rePwd = /^(?=.*[a-z])(?=.+[A-Z])(?=.+[!@#$%^&*/><]).{8,}$/;
+        const rePwd = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*/><]).{8,}$/;
         if (!rePwd.test(pwd.value)) {
           setPwdErr("Password harus memiliki minimal 8 karakter, huruf kecil, huruf besar, dan satu karakter spesial (!@#$%^&*/><)");
         } else {
           setPwdErr("");
-          Object.assign(storeForm, {
+          Object.assign(result, {
             pwd: pwd.value
           });
           isPwd = true;
@@ -79,14 +87,27 @@ function Register() {
     }
 
     if (isEmail && isPwd) {
-      addUsr(storeForm);
-
-      // dispatch(addUser({
-      //   email: email.value,
-      //   pwd: pwd.value
-      // }));
-
-      setLclUsers([...lclUsers, storeForm]);
+      // addUser(result);
+      const url = `${import.meta.env.VITE_BASE_API_URL}/auth/register`;
+      const body = {
+        email: email.value,
+        password: pwd.value,
+      };
+      const request = new Request(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      fetch(request, {
+        body: JSON.stringify(body)
+      })
+        .then((response) => {
+          if (!response.ok) throw response.statusText;
+          return response.json();
+        })
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
       navigate("/auth/login");
     }
   }
@@ -105,7 +126,7 @@ function Register() {
         rounded-md p-[2rem] w-[384px]">
           <div className="steps flex items-center justify-between">
             {stepItem.map((item, i) => {
-              return <Step i={i} how={item.how} bg={item.bg} color={item.color} />
+              return <Step key={i} i={i} how={item.how} bg={item.bg} color={item.color} />
             })}
           </div>
 
@@ -132,7 +153,7 @@ function Register() {
               <p id="errpwd" className="text-red-800 text-xs font-semibold">{pwdErr}</p>
             </div>
             <div className="flex items-center">
-              <input className="me-[12px] accent-[#1D4ED8]" type="checkbox" name="" id="terms" />
+              <input className="me-[12px] accent-[#1D4ED8]" type="checkbox" name="" id="terms" required />
               <label className="text-[#696F79]" htmlFor="terms">I agree to terms & condition</label>
             </div>
             <button className="bg-[#1D4ED8] text-[#F7F7FC] rounded-[2px] 
@@ -166,7 +187,7 @@ function Register() {
         </div>
       </div>
     </Fragment>
-  )
+  );
 }
 
 export default Register;
