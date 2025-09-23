@@ -14,4 +14,4 @@ jobs:
                 registry: ghcr.io
                 username: ${{ github.actor }}
                 password: ${{ secrets.GITHUB_TOKEN }}
-                buildArgs: API_URL=http://192.168.100.178:6011
+                buildArgs: API_URL=/api/
