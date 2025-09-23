@@ -4,12 +4,74 @@ import { discoverMovieOptions, genreOptions, movieOptions, searchOptions } from 
 
 const initialState = {
   movies: [],
+  upcoming: [],
   genres: [],
+  detail: {},
   isLoading: false,
   isSuccess: false,
   isFailed: false,
   error: null,
 };
+
+export const getDetail = createAsyncThunk(
+  "movies/get_detail",
+  async (id, { rejectWithValue }) => {
+    try {
+      const url = `${import.meta.env.VITE_BASE_API_URL}/movies/${id}`;
+      const resp = await fetch(url);
+
+      if (!resp.ok) throw resp.statusText;
+      const data = await resp.json();
+      return data.result;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+)
+
+export const getFilter = createAsyncThunk(
+  "movies/get_filter",
+  async ({page = 1, q = "", genre = ""}, { rejectWithValue }) => {
+    try {
+      let url = `${import.meta.env.VITE_BASE_API_URL}/movies?page=${page}`;
+      if (q != "") {
+        url += `&q=${q}`
+      }
+      if (genre != "") {
+        url += `&genre=${genre}`
+      }
+      const resp = await fetch(url);
+
+      if (!resp.ok) {
+        throw new Error(`Error ${resp.status}: ${resp.statusText}`);
+      }
+
+      const data = await resp.json();
+      return data.result;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+)
+
+export const getUpcoming = createAsyncThunk(
+  "movies/get_upcoming",
+  async (_, { rejectWithValue }) => {
+    try {
+      const url = `${import.meta.env.VITE_BASE_API_URL}/movies/upcoming`;
+      const resp = await fetch(url);
+
+      if (!resp.ok) {
+        throw new Error(`Error ${resp.status}: ${resp.statusText}`);
+      }
+
+      const data = await resp.json();
+      return data.result;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
 
 export const getMovie = createAsyncThunk(
   "movies/get_movie",
@@ -67,6 +129,51 @@ const movieSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(getDetail.pending, (state) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isFailed = false;
+        state.error = null;
+      })
+      .addCase(getDetail.fulfilled, (state, { payload }) => {
+        state.detail = payload;
+        state.isSuccess = true;
+        state.isLoading = false;
+      })
+      .addCase(getDetail.rejected, (state, { payload, error }) => {
+        state.error = { payload, error };
+        state.isFailed = true;
+        state.isLoading = false;
+      })
+
+      .addCase(getFilter.fulfilled, (state, { payload }) => {
+        state.movies = payload;
+        state.isSuccess = true;
+        state.isLoading = false;
+      })
+      .addCase(getFilter.rejected, (state, { payload, error }) => {
+        state.error = { payload, error };
+        state.isFailed = true;
+        state.isLoading = false;
+      })
+
+      .addCase(getUpcoming.pending, (state) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isFailed = false;
+        state.error = null;
+      })
+      .addCase(getUpcoming.fulfilled, (state, { payload }) => {
+        state.upcoming = payload;
+        state.isSuccess = true;
+        state.isLoading = false;
+      })
+      .addCase(getUpcoming.rejected, (state, { payload, error }) => {
+        state.error = { payload, error };
+        state.isFailed = true;
+        state.isLoading = false;
+      })
+
       .addCase(getDiscoverMovie.pending, (state) => {
         state.isLoading = true;
         state.isSuccess = false;
