@@ -1,7 +1,8 @@
-import { format, parseISO } from "date-fns";
+import { format, parse, parseISO } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import toast, { Toaster } from "react-hot-toast";
 
 function Table() {
   // const { histories } = useSelector((state) => state);
@@ -41,6 +42,7 @@ function Table() {
     <main className={`bg-[#f5f6f8] overflow-hidden md:overflow-auto max-w-screen px-8 md:px-28 grid py-12 min-h-screen 
     ${pop && "bg-black/60"}`}
     >
+      <Toaster />
       <section className={`bg-white rounded-2xl p-5 md:px-8 w-full h-max overflow-hidden md:overflow-auto md:flex md:flex-col md:gap-8
             ${pop && "brightness-50"}
       `}>
@@ -99,6 +101,7 @@ function Table() {
 
 function EditModal({ pop, setPop, currMovie }) {
   const modalRef = useRef(null);
+  const { token } = useSelector((state) => state.auth);
 
   // 🔥 When modal pops open, scroll smoothly into view
   useEffect(() => {
@@ -110,11 +113,124 @@ function EditModal({ pop, setPop, currMovie }) {
     }
   }, [pop]);
 
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    const formBody = {};
+
+    // getValue helper
+    const getValue = (name) => form[name]?.value?.trim();
+
+    // TITLE
+    const newTitle = getValue("title");
+    if (newTitle && newTitle !== currMovie.title) {
+      formBody.title = newTitle;
+    }
+
+    // RUNTIME (hour + minute → total minutes)
+    const hour = parseInt(getValue("hour") || 0, 10);
+    const minute = parseInt(getValue("minute") || 0, 10);
+    const newRuntime = hour * 60 + minute;
+
+    if (newRuntime && newRuntime !== currMovie.runtime) {
+      formBody.runtime = newRuntime;
+    }
+
+    // OVERVIEW
+    const newOverview = getValue("overview");
+    if (newOverview && newOverview !== currMovie.overview) {
+      formBody.overview = newOverview;
+    }
+
+    // RELEASE DATE
+    const newReleaseDate = getValue("release_date");
+    if (newReleaseDate && newReleaseDate !== currMovie.release_date) {
+      // Convert from DD/MM/YYYY → YYYY-MM-DD
+      const parsedDate = parse(newReleaseDate, "dd/MM/yyyy", new Date());
+      formBody.release_date = format(parsedDate, "yyyy-MM-dd");
+    }
+
+    const formData = new FormData();
+    Object.entries(formBody).forEach(([key, value]) => {
+      if (value) formData.append(key, value);
+    });
+
+    try {
+      const url = `${import.meta.env.VITE_BASE_API_URL}/admin/movies/${currMovie.id}`;
+      const options = {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      };
+
+      const response = await fetch(url, options);
+      const result = await response.json();
+
+      console.log(result);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const editPoster = async (e) => {
+    if (!e) return;
+
+    const formData = new FormData();
+    formData.append("poster_path", e);
+
+    try {
+      const url = `${import.meta.env.VITE_BASE_API_URL}/admin/movies/${currMovie.id}`;
+      const options = {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      };
+
+      const response = await fetch(url, options);
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success("Poster updated succesfully!");
+      }
+      console.log(result);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const editBackdrop = async (e) => {
+    if (!e) return;
+
+    const formData = new FormData();
+    formData.append("backdrop_path", e);
+
+    try {
+      const url = `${import.meta.env.VITE_BASE_API_URL}/admin/movies/${currMovie.id}`;
+      const options = {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      };
+
+      const response = await fetch(url, options);
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success("Backdrop updated succesfully!");
+      }
+      console.log(result);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   if (!currMovie) return null;
 
   return (
     <form
       ref={modalRef}
+      onSubmit={handleUpdate}
       className={`paym-info flex flex-col w-9/10 absolute z-9998 md:w-[90vw] h-min justify-self-center bg-white rounded-xl p-6 gap-3 shadow-lg transition-all
         ${pop ? "visible scale-100 opacity-100" : "invisible scale-105 opacity-0"}
       `}
@@ -124,18 +240,55 @@ function EditModal({ pop, setPop, currMovie }) {
         onClick={() => setPop(!pop)}
       ></div>
 
+      <div
+        className="flex gap-6"
+      >
+        <label htmlFor="posterUpload"
+          className="cursor-pointer hover:opacity-70"
+        >Poster <i className="nf nf-fa-file_image"></i>
+        </label>
+        <input
+          type="file"
+          id="posterUpload"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              editPoster(file);
+            }
+          }}
+        />
+
+        <label htmlFor="backdropUpload"
+          className="cursor-pointer hover:opacity-70"
+        >Backdrop <i className="nf nf-fa-file_image"></i>
+        </label>
+        <input
+          type="file"
+          id="backdropUpload"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              editBackdrop(file);
+            }
+          }}
+        />
+      </div>
+
       <InputItem fill={"Movie Name"} forId={"title"} val={currMovie.title} />
       <InputItem fill={"Category"} forId={"genre"} val={currMovie.genres.map(g => g.name).join(', ')} />
       <InputDateDuration
         date={format(new Date(currMovie.release_date), "dd/MM/yyyy")}
         runtime={currMovie.runtime}
       />
-      <InputItem fill={"Director Name"} forId={"director"} />
-      <InputItem fill={"Cast"} forId={"cast"} />
+      <InputItem fill={"Director Name"} forId={"director"} val={currMovie.director} />
+      <InputItem fill={"Cast"} forId={"cast"} val={currMovie.casts} />
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="overview" className="text-[#4E4B66]">Synopsis</label>
         <textarea
+          defaultValue={currMovie.overview}
           name="overview"
           id="overview"
           rows="4"
@@ -151,46 +304,6 @@ function EditModal({ pop, setPop, currMovie }) {
     </form>
   );
 }
-
-// function EditModal({ pop, setPop, currMovie }) {
-//   if (!currMovie) return null;
-
-//   return (
-//     <form className={`paym-info flex flex-col w-9/10 absolute z-9998 md:w-[90vw] h-min justify-self-center bg-white rounded-xl p-6 gap-3 shadow-lg transition-all
-//       ${pop ? "visible scale-100 opacity-100" : "invisible scale-105 opacity-0"}
-//     `}>
-//       <div
-//         className="w-5 h-5 rounded-full bg-red-700 self-end cursor-pointer hover:opacity-65"
-//         onClick={() => setPop(!pop)}
-//       ></div>
-//       <InputItem fill={"Movie Name"} forId={"title"}
-//         val={currMovie.title}
-//       />
-//       <InputItem fill={"Category"} forId={"genre"}
-//         val={currMovie.genres.map(g => g.name).join(', ')}
-//       />
-//       <InputDateDuration
-//         date={format(new Date(currMovie.release_date), "dd/MM/yyyy")}
-//         runtime={currMovie.runtime}
-//       />
-//       <InputItem fill={"Director Name"} forId={"director"} />
-//       <InputItem fill={"Cast"} forId={"cast"} />
-//       <div
-//         className="flex flex-col gap-1.5"
-//       >
-//         <label htmlFor="overview"
-//           className="text-[#4E4B66]"
-//         >Synopsis</label>
-//         <textarea name="overview" id="overview" rows="4"
-//           className="border border-[#DEDEDE] text-[#4E4B66] p-6 bg-[#FCFDFE] rounded-sm"
-//         ></textarea>
-//       </div>
-//       <button
-//         className="w-full mt-3 bg-[#1D4ED8] text-[#F7F7FC] font-bold text-lg py-2 rounded-sm shadow-sm hover:opacity-85 cursor-pointer"
-//       >Save Movie</button>
-//     </form>
-//   );
-// }
 
 function TItem({ movie, i, setPop, setSelected }) {
   const actionStyle = "p-2 rounded-md hover:cursor-pointer hover:opacity-[.8]";
@@ -216,8 +329,8 @@ function TItem({ movie, i, setPop, setSelected }) {
         <i
           className={`bg-[#5D5FEF] ${actionStyle} nf nf-md-pencil`}
           onClick={() => {
-            setSelected(i); // ✅ track which movie is selected
-            setPop(true);   // ✅ show modal
+            setSelected(i);
+            setPop(true);
           }}
         ></i>
 

@@ -44,7 +44,7 @@ export default function Navbar() {
     // Navigation links
     const navLinks = [
         { to: "/admin/chart", label: "Dashboard" },
-        { to: "/admin/create", label: "Movie" },
+        { to: "/admin/table", label: "Movie" },
     ];
 
     const menuItemStyle = "cursor-pointer";

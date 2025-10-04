@@ -9,6 +9,17 @@ const inputStyle =
 const Create = () => {
   const [selectedTime, setSelectedTime] = useState([]);
   const [resetKey, setResetKey] = useState(Date.now()); // unique key to reset form
+  const [posterPreview, setPosterPreview] = useState(null);
+  const [backdropPreview, setBackdropPreview] = useState(null);
+
+  const handleFileChange = (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const previewUrl = URL.createObjectURL(file);
+    if (type === "poster") setPosterPreview(previewUrl);
+    if (type === "backdrop") setBackdropPreview(previewUrl);
+  };
 
   const times = [
     { id: 1, time: "03:40pm" },
@@ -44,6 +55,7 @@ const Create = () => {
 
     const body = {
       poster_path: form.poster.files,
+      backdrop_path: form.backdrop.files,
       title: form.title.value,
       genres,
       release_date: format(parseRelease, "yyyy-MM-dd"),
@@ -61,6 +73,9 @@ const Create = () => {
 
     for (const prop in body) {
       if (prop === "poster_path") {
+        const file = body[prop];
+        if (file?.[0]) formData.append(prop, file[0]);
+      } else if (prop === "backdrop_path") {
         const file = body[prop];
         if (file?.[0]) formData.append(prop, file[0]);
       } else if (prop === "schedule_time") {
@@ -89,6 +104,8 @@ const Create = () => {
 
       // ✅ Reset form & state
       setSelectedTime([]);
+      setPosterPreview(null);   // clear poster preview
+      setBackdropPreview(null); // clear backdrop preview
       setResetKey(Date.now()); // force re-render to clear inputs
     } catch (err) {
       console.error(err);
@@ -106,15 +123,68 @@ const Create = () => {
         <h2 className="text-2xl font-bold">Add New Movie</h2>
 
         {/* Poster */}
-        <div className="flex gap-3">
+        <div className="flex gap-4">
+
           <div className="flex flex-col gap-1.5">
-            <p className="text-[#696F79]">Upload Image</p>
+            <p className="text-[#696F79]">Poster</p>
+            {posterPreview && (
+              <img
+                src={posterPreview}
+                alt="Poster Preview"
+                className="mt-2 max-h-40 rounded-md shadow-md w-min"
+              />
+            )}
+            <label className={`${posterPreview ? "w-full" : "w-max px-8"} text-center bg-[#1D4ED8] font-bold text-[#F7F7FC] py-1.5 rounded-lg cursor-pointer hover:opacity-80 inline-block`}>
+              Upload
+              <input
+                type="file"
+                name="poster"
+                className="hidden"
+                onChange={(e) => handleFileChange(e, "poster")}
+              />
+            </label>
+          </div>
+
+          {/* Backdrop */}
+          <div className="flex flex-col gap-1.5">
+            <p className="text-[#696F79]">Backdrop</p>
+            {backdropPreview && (
+              <img
+                src={backdropPreview}
+                alt="Backdrop Preview"
+                className="mt-2 max-h-40 rounded-md shadow-md w-min"
+              />
+            )}
+            <label className="w-min bg-[#1D4ED8] font-bold text-[#F7F7FC] px-8 py-1.5 rounded-lg cursor-pointer hover:opacity-80 inline-block">
+              Upload
+              <input
+                type="file"
+                name="backdrop"
+                className="hidden"
+                onChange={(e) => handleFileChange(e, "backdrop")}
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Poster */}
+        {/* <div className="flex gap-3">
+          <div className="flex flex-col gap-1.5">
+            <p className="text-[#696F79]">Poster</p>
             <label className="w-min bg-[#1D4ED8] font-bold text-[#F7F7FC] px-8 py-1.5 rounded-lg cursor-pointer hover:opacity-80 inline-block">
               Upload
               <input type="file" name="poster" className="hidden" />
             </label>
           </div>
-        </div>
+
+          <div className="flex flex-col gap-1.5">
+            <p className="text-[#696F79]">Backdrop</p>
+            <label className="w-min bg-[#1D4ED8] font-bold text-[#F7F7FC] px-8 py-1.5 rounded-lg cursor-pointer hover:opacity-80 inline-block">
+              Upload
+              <input type="file" name="backdrop" className="hidden" />
+            </label>
+          </div>
+        </div> */}
 
         <InputItem label="Movie Name" name="title" />
         <InputItem label="Category" name="genre" />
