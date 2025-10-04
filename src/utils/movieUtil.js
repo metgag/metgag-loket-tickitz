@@ -30,7 +30,7 @@ export function convLocations(input) {
 
 export function convTime(time) {
     switch (time) {
-        case "03:40 AM":
+        case "03:40 PM":
             return 1;
         case "08:30 PM":
             return 2;

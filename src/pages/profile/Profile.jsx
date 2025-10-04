@@ -1,8 +1,8 @@
 import Preferences from './Preferences.jsx'
 import Order from './Order.jsx'
-import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
+import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { updateUser } from '../../redux/slices/userSlice.js';
 // import useAutoLogout from '../../hooks/useAutoLogout.js';
 // import { getProfile } from '../../redux/slices/personalSlice.js';
 // import axios from 'axios';
@@ -10,73 +10,90 @@ import { useNavigate } from 'react-router';
 function Profile() {
   const [menu, setMenu] = useState(false);
   const { token } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState({
-    first_name: "",
-    last_name: "",
-    phone_number: "",
-    point_count: 0,
-    avatar: "",
-  });
 
-  useEffect(() => {
-    if (!token) return;
+  const dispatch = useDispatch();
 
-    const url = `${import.meta.env.VITE_BASE_API_URL}/users/`;
-    const options = {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token.token}`,
-      },
-    };
+  const {
+    first_name, last_name, phone_number, point_count, avatar,
+  } = useSelector((state) => state.info);
+  const profile = {
+    first_name,
+    last_name,
+    phone_number,
+    point_count,
+    avatar,
+  };
 
-    const request = new Request(url, options);
+  async function editAvatar(selectedFile) {
+    if (!selectedFile) return;
 
-    fetch(request)
-      .then((resp) => {
-        if (!resp.ok) throw resp.statusText;
+    const formData = new FormData();
+    formData.append("avatar", selectedFile);
 
-        return resp.json();
-      })
-      .then(res => {
-        if (res.success) {
-          setProfile(res.result)
-        }
-      })
-      .catch(err => console.log(err));
-  }, [token]);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-  // useEffect(() => {
-  //   if (profile && profile.first_name && profile.last_name) {
-  //     setFullname(`${profile.first_name} ${profile.last_name}`);
-  //   }
-  // }, [profile]);
+      const result = await response.json();
 
-  function editAvatar(selectedFile) {
-    const url = `${import.meta.env.VITE_BASE_API_URL}/users/`;
-    const options = {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token.token}`,
-      },
-    };
-    const request = new Request(url, options);
-    const formdat = new FormData();
-    formdat.append("avatar", selectedFile);
+      if (!response.ok) throw new Error(result.message || response.statusText);
 
-    fetch(request, {
-      body: formdat,
-    })
-      .then((resp) => {
-        if (!resp.ok) throw resp.statusText;
-        return resp.json();
-      })
-      .then(res => {
-        console.log(res);
-        navigate(0);
-      })
-      .catch(err => console.log(err));
+      // console.log("Avatar update response:", result);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+        // console.log(result);
+        const { avatar } = result.result;
+
+        setTimeout(() => {
+          dispatch(updateUser({
+            avatar,
+          }));
+        }, 800);
+
+      } catch (err) {
+        console.error(err);
+      }
+    } catch (err) {
+      console.error("Error updating avatar:", err);
+    }
   }
+
+  // function editAvatar(selectedFile) {
+  //   const url = `${import.meta.env.VITE_BASE_API_URL}/users/`;
+  //   const options = {
+  //     method: "PATCH",
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   };
+  //   const request = new Request(url, options);
+  //   const formdat = new FormData();
+  //   formdat.append("avatar", selectedFile);
+
+  //   fetch(request, {
+  //     body: formdat,
+  //   })
+  //     .then((resp) => {
+  //       if (!resp.ok) throw resp.statusText;
+  //       return resp.json();
+  //     })
+  //     .then(res => {
+  //       console.log(res);
+  //     })
+  //     .catch(err => console.log(err));
+  // }
 
   const activeMenu = "text-[#14142B] font-semibold border-b border-[#1D4ED8]";
   const inactiveMenu = "text-[#AAAAAA] font-semibold yet-gray";
@@ -105,7 +122,7 @@ function Profile() {
             <div className="relative w-[7rem] h-[7rem] self-center">
               <img
                 className={`user-pic shadow-lg object-cover rounded-full w-full h-full`}
-                src={`${import.meta.env.VITE_BASE_API_URL}/user/${profile.avatar}`}
+                src={`${import.meta.env.VITE_BASE_API_URL}/user/${avatar}`}
               />
               <label
                 htmlFor="profileUpload"
@@ -133,8 +150,8 @@ function Profile() {
           </div>
           <div className="whoami flex flex-col text-center gap-[.375rem]">
             <h3 className="font-semibold text-[#14142B]">
-              {profile.first_name && profile.last_name ?
-                `${profile.first_name} ${profile.last_name}`
+              {first_name && last_name ?
+                `${first_name} ${last_name}`
                 :
                 "user"
               }
@@ -152,7 +169,7 @@ function Profile() {
                 overflow-hidden shadow-[0_12px_0_-6px_rgba(29,78,216,0.5)]">
               <h4 className="text-white">Moviegoers</h4>
               <h3 className="text-white">
-                {profile.point_count}
+                {point_count}
                 <span
                   className="text-xs">points</span></h3>
               <div
@@ -169,7 +186,7 @@ function Profile() {
           </div>
           <div className="bar-point flex flex-col items-center gap-[.625rem]">
             <h4 className="font-medium text-sm">
-              {500 - profile.point_count}
+              {500 - point_count}
               points become a master
             </h4>
             <div

@@ -1,89 +1,112 @@
-import { format, set } from "date-fns";
-import { useContext, useState } from "react";
+import { addDays, format, parse, parseISO } from "date-fns";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { historyContext as HistoryContext } from "../../context/history/historyContext";
+import { convertTime } from "../../utils/convertTime";
 
 function Order() {
-  // const { storeSelected } = useSelector((state) => state.selectedMovie);
-  // const { selected, orderDetail } = useSelector((state) => state.selectedMovie);
-  const { histories } = useContext(HistoryContext)
+  const { token } = useSelector((state) => state.auth);
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    const fetchOrderHistory = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/orders`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error(response.statusText);
+
+        const data = await response.json();
+        const { order_history } = data.result;
+        setHistory(order_history);
+      } catch (error) {
+        console.error("Failed to fetch order history:", error);
+      }
+    };
+
+    if (token) fetchOrderHistory();
+  }, [token]);
 
   return (
-    <section className="flex rounded-2xl flex-col gap-7">
-      <div className="history-wrapper gap-5 flex flex-col">
-        {[...histories].reverse().map((e, i) => {
-          return <HistoryItem
-            title={e.movie.title}
-            date={e.schedule.date}
-            time={e.schedule.time}
-            seat={e.seat}
-            // isActive={!e.isPaid}
-            // isPaid={e.isPaid}
-            key={i} />
-        })}
+    <section className="flex flex-col gap-7 rounded-2xl">
+      <div className="history-wrapper flex flex-col gap-5">
+        {history.map((order, index) => (
+          <HistoryItem
+            key={index}
+            title={order.title}
+            date={order.date}
+            time={order.time}
+            seat={order.seats}
+            cinema={order.cinema_name}
+            isActive={!order.paid_at}
+            isPaid={order.paid_at}
+          />
+        ))}
       </div>
     </section>
   );
 }
 
-function HistoryItem(props) {
-  const [menu, setMenu] = useState(false);
+function HistoryItem({ title, date, time, seat, cinema, isActive, isPaid }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const formattedDate = format(parseISO(date), "EEEE, dd LLLL yyyy");
 
   return (
-    < div key={props.i}
-      className="history history-1 bg-white rounded-2xl" >
-      <div className="history-a flex p-[1.5rem_2rem] justify-between 
-      items-center border-b border-[#DEDEDE] md:border-none">
-        <div className="date-title flex flex-col gap-2">
-          <p className="text-[#AAAAAA]">{format(props.date, "EEEE, dd LLLL yyyy")} - {props.time}</p>
-          <h3 className="font-semibold text-2xl">{props.title}</h3>
+    <div className="history bg-white rounded-2xl">
+      <div className="flex items-center justify-between border-b border-[#DEDEDE] p-[1.5rem_2rem] md:border-none">
+        <div className="flex flex-col gap-2">
+          <p className="text-[#AAAAAA]">
+            {formattedDate} - {convertTime(time)}
+          </p>
+          <h3 className="text-2xl font-semibold">{title}</h3>
         </div>
-        <img src={`/sponsor/${props.cinema}.svg`} alt="" />
+        <img src={`${cinema}`} alt={cinema} />
       </div>
-      <div className="history-b flex flex-col md:flex-row p-[1.5rem_2rem] md:justify-between">
-        <div className="btn flex gap-3 flex-col md:flex-row">
-          {props.isActive ?
-            <BtnActive /> : <BtnUsed />
-          }
-          {props.isPaid ?
-            <BtnPaid /> : <BtnNotPaid />
-          }
+
+      <div className="flex flex-col p-[1.5rem_2rem] md:flex-row md:justify-between">
+        <div className="flex flex-col gap-3 md:flex-row">
+          {isActive ? <BtnActive /> : <BtnUsed />}
+          {isPaid ? <BtnPaid /> : <BtnNotPaid />}
         </div>
-        <h4 className="text-[#AAAAAA] flex gap-3.5 items-center
-          hover:cursor-pointer hover:opacity-[.6] justify-center mt-6"
-          onClick={() => {
-            setMenu(!menu);
-          }}
+        <h4
+          className="mt-6 flex items-center justify-center gap-3.5 text-[#AAAAAA] hover:cursor-pointer hover:opacity-60"
+          onClick={() => setIsExpanded(!isExpanded)}
         >
-          Show Details <i
-            className={`nf nf-cod-chevron_${menu ? "up" : "down"}`}>
-          </i></h4>
+          Show Details
+          <i className={`nf nf-cod-chevron_${isExpanded ? "up" : "down"}`}></i>
+        </h4>
       </div>
-      {
-        menu &&
-        <div className="paym-info flex flex-col p-[.375rem_2rem_1.5rem] gap-5">
-          {props.isPaid ?
-            <TicketQR title={props.title} seat={props.seat} time={props.time} date={props.date} /> : <TicketInfo seat={props.seat} date={props.date} />
-          }
+
+      {isExpanded && (
+        <div className="flex flex-col gap-5 p-[.375rem_2rem_1.5rem]">
+          {isPaid ? (
+            <TicketQR title={title} seat={seat} time={time} date={date} />
+          ) : (
+            <TicketInfo seat={seat} date={date} />
+          )}
         </div>
-      }
-    </div >
+      )}
+    </div>
   );
 }
 
 const h3Style = "fw-md text-[#14142B]";
 
 function TicketQR({ time, seat, title, date }) {
-  const orderDate = parseInt(date.split("-")[2]) + 2;
-  const watchDate = set(new Date(date), { date: orderDate });
+  const parsedDate = parseISO(date);
+  const formattedDate = format(parsedDate, "dd LLL");
 
-  const items = [
+  const parsedTime = parse(time, "HH:mm:ss.SSSSSS", new Date());
+  const formattedTime = format(parsedTime, "h:mmaaa");
+
+  const details = [
     { title: "Category", content: "PG-13" },
-    { title: "Time", content: time.toLowerCase() },
-    { title: "Seats", content: `${seat.join(', ')}` },
+    { title: "Time", content: formattedTime },
+    { title: "Seats", content: seat.join(", ") },
     { title: "Movie", content: title },
-    { title: "Date", content: format(watchDate, "dd LLL") },
+    { title: "Date", content: formattedDate },
     { title: "Count", content: `${seat.length} pcs` },
   ];
 
@@ -91,11 +114,11 @@ function TicketQR({ time, seat, title, date }) {
     <>
       <h3 className={`${h3Style} text-xl font-semibold`}>Ticket Information</h3>
       <div className="ticket-card md:flex items-center gap-8">
-        <img width="160" src="/qr.png" alt="" />
-        <div className="grid-detail md:w-max grid grid-cols-3 gap-4 gap-x-6">
-          {items.map((e, i) => {
-            return <QrItem title={e.title} content={e.content} key={i} />
-          })}
+        <img width="160" src="/qr.png" alt="QR Code" />
+        <div className="grid grid-cols-3 gap-4 gap-x-6 md:w-max">
+          {details.map((item, idx) => (
+            <QrItem key={idx} title={item.title} content={item.content} />
+          ))}
         </div>
         <div className="mt-6 md:ms-auto md:me-16">
           <h4 className="flex flex-col font-semibold">
@@ -112,82 +135,85 @@ function QrItem({ title, content }) {
   return (
     <div className="item">
       <h5 className="text-[#aaaaaa]">{title}</h5>
-      <p className="text-wrap text-[#14142B] font-semibold">{content}</p>
+      <p className="text-wrap font-semibold text-[#14142B]">{content}</p>
     </div>
   );
 }
 
 function TicketInfo({ seat, date }) {
   const navigate = useNavigate();
-  const endPaym = parseInt(date.split("-")[2]) + 2;
-  const endDate = set(new Date(date), { date: endPaym })
+  const dueDate = format(addDays(parseISO(date), 2), "LLLL dd, yyyy");
 
   return (
     <>
       <h3 className={`${h3Style} text-xl font-semibold`}>Ticket Information</h3>
-      <div className="no-rek flex items-center justify-between">
-        <p className="text-[#8692A6] text-sm">No. Rekening Virtual</p>
-        <div className="side flex items-center gap-3.5">
-          <p className="text-[#14142B] font-bold">12321328913829724</p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-[#8692A6]">No. Rekening Virtual</p>
+        <div className="flex items-center gap-3.5">
+          <p className="font-bold text-[#14142B]">12321328913829724</p>
           <button
-            className="border border-[#1d4ed8] rounded-sm p-1.5 px-3 
-              bg-transparent text-[#1d4ed8] hover:cursor-pointer
-              hover:opacity-[.4]"
-          >Copy</button>
+            className="rounded-sm border border-[#1d4ed8] bg-transparent p-1.5 px-3 text-[#1d4ed8] hover:cursor-pointer hover:opacity-40"
+          >
+            Copy
+          </button>
         </div>
       </div>
-      <div className="total flex justify-between">
-        <p className="text-[#8692A6] text-sm">Total Payment</p>
-        <h4 className="text-[#1d4ed8] font-bold text-lg">{`$${seat.length * 10}`}</h4>
+
+      <div className="flex justify-between">
+        <p className="text-sm text-[#8692A6]">Total Payment</p>
+        <h4 className="text-lg font-bold text-[#1d4ed8]">{`$${seat.length * 10}`}</h4>
       </div>
-      <p className="text-[#8692A6]"
-      >Pay this payment bill before it is due,
-        <span className="text-[#D00707]"> on {format(endDate, "LLLL dd, yyyy")}</span>. If the bill has not been paid by
-        the specified time, it will be forfeited.
+
+      <p className="text-[#8692A6]">
+        Pay this bill before it is due,{" "}
+        <span className="text-[#D00707]">on {dueDate}</span>. If not paid by
+        then, it will be forfeited.
       </p>
+
       <button
-        className="bg-[#1d4ed8] md:w-max text-white rounded-sm font-medium 
-      p-[.625rem_3rem] text-sm cursor-pointer hover:opacity-[.8]"
+        className="cursor-pointer rounded-sm bg-[#1d4ed8] p-[.625rem_3rem] text-sm font-medium text-white hover:opacity-80 md:w-max"
         onClick={() => navigate("/movie/ticket")}
-      >Cek Pembayaran</button>
+      >
+        Cek Pembayaran
+      </button>
     </>
   );
 }
 
-function BtnActive() {
-  return (
-    <button disabled
-      className="py-1.5 md:w-48 rounded-md font-semibold bg-[#00BA8833] text-[#00BA88]">
-      Ticket in active
-    </button>
-  );
-}
+const BtnActive = () => (
+  <button
+    disabled
+    className="md:w-48 rounded-md bg-[#00BA8833] py-1.5 font-semibold text-[#00BA88]"
+  >
+    Ticket in active
+  </button>
+);
 
-function BtnUsed() {
-  return (
-    <button disabled
-      className="py-1.5 md:w-48 rounded-md font-semibold bg-[#e2e3e9] text-[#6E7191]">
-      Ticket used
-    </button>
-  );
-}
+const BtnUsed = () => (
+  <button
+    disabled
+    className="md:w-48 rounded-md bg-[#e2e3e9] py-1.5 font-semibold text-[#6E7191]"
+  >
+    Ticket used
+  </button>
+);
 
-function BtnPaid() {
-  return (
-    <button disabled
-      className="py-1.5 md:w-36 rounded-md font-semibold bg-[#d2dcf7] text-[#1D4ED8]">
-      Paid
-    </button>
-  );
-}
+const BtnPaid = () => (
+  <button
+    disabled
+    className="md:w-36 rounded-md bg-[#d2dcf7] py-1.5 font-semibold text-[#1D4ED8]"
+  >
+    Paid
+  </button>
+);
 
-function BtnNotPaid() {
-  return (
-    <button disabled
-      className="py-1.5 md:w-36 rounded-md font-semibold bg-[#E82C2C33] text-[#E82C2C]">
-      Not Paid
-    </button>
-  );
-}
+const BtnNotPaid = () => (
+  <button
+    disabled
+    className="md:w-36 rounded-md bg-[#E82C2C33] py-1.5 font-semibold text-[#E82C2C]"
+  >
+    Not Paid
+  </button>
+);
 
 export default Order;

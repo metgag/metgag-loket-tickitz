@@ -1,92 +1,100 @@
-// src/components/Navbar.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
-import { logout } from "../redux/slices/tokenSlice";
+import { clearUser } from "../redux/slices/authSlice";
+import { clearSchedule } from "../redux/slices/scheduleSlice";
+import { clearInfo } from "../redux/slices/userSlice";
+import { clearOrder } from "../redux/slices/orderSlice";
 
 export default function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
+  const { avatar } = useSelector((state) => state.info);
 
-  const [menuVisible, setMenuVisible] = useState(false);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  function handleLogout() {
-    const url = `${import.meta.env.VITE_BASE_API_URL}/auth/logout`;
-    const options = {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token.token}`,
-      },
-    };
-
-    const request = new Request(url, options);
-    fetch(request)
-      .then((resp) => {
-        if (!resp.ok) throw resp.statusText;
-        return resp.json();
-      })
-      .then(res => {
-        if (res.success) {
-          console.log(res.result);
-          dispatch(logout());
-          navigate("/auth/login");
+  // Handle user logout
+  async function handleLogout() {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_API_URL}/auth/logout`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      })
-      .catch(err => console.log(err))
+      );
+
+      if (!response.ok) throw new Error(response.statusText);
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log(result.result);
+        dispatch(clearUser());
+        dispatch(clearSchedule());
+        dispatch(clearOrder());
+        dispatch(clearInfo());
+        navigate("/auth/login", { replace: true });
+      }
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   }
 
-  const pages = [
-    { to: "/", page: "Home" },
-    { to: "/movie/list", page: "Movie" },
+  // Navigation links
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/movie/list", label: "Movie" },
   ];
-  const authStyle = "p-2 px-3 rounded-md hover:opacity-[.8]";
-  const menuStyle = "cursor-pointer";
+
+  const authButtonStyle = "p-2 px-3 rounded-md hover:opacity-80";
+  const menuItemStyle = "cursor-pointer";
 
   const NavLinks = () =>
-    pages.map((page, i) => (
-      <ListItem key={i} to={page.to} page={page.page} />
+    navLinks.map((link, idx) => (
+      <ListItem key={idx} to={link.to} label={link.label} />
     ));
 
   const MobileMenu = () =>
-    menuVisible && (
-      <div className="flex flex-col absolute text-right top-11 bg-white w-max">
+    isMenuOpen && (
+      <div className="absolute top-11 flex flex-col w-max bg-white text-right">
         <NavLinks />
       </div>
     );
 
-  const UserMenu = () =>
-    dropdownVisible && (
-      <div
-        className={`manage-usr absolute flex-col top-11 border-b border-[#DEDEDE] right-8 md:right-0 bg-white`}
-      >
+  const UserDropdown = () =>
+    isDropdownOpen && (
+      <div className="absolute top-11 right-8 md:right-0 flex-col bg-white border-b border-[#DEDEDE]">
         <Link to="/profile">
-          <div className={`${menuStyle} border-[#DEDEDE] border-b`}>
+          <div className={`${menuItemStyle} border-b border-[#DEDEDE]`}>
             Preferences
           </div>
         </Link>
-        <div className={menuStyle} onClick={handleLogout}>
+        <div className={menuItemStyle} onClick={handleLogout}>
           Log Out
         </div>
       </div>
     );
 
   return (
-    <header className="py-2 px-6 md:px-28 sticky top-0 border-[#DEDEDE] text-sm font-medium border-b bg-white z-9999">
+    <header className="sticky top-0 z-9999 bg-white border-b border-[#DEDEDE] py-2 px-6 md:px-28 text-sm font-medium">
       <Toaster />
-      <nav className="flex items-center justify-between relative">
+      <nav className="relative flex items-center justify-between">
         {/* Logo */}
-        <div className="logo flex items-center relative gap-2">
+        <div className="flex items-center gap-2">
           <img src="/tickitz-blu.svg" alt="Logo" />
         </div>
 
-        {/* Desktop Nav */}
-        <div className="center gap-6 hidden md:flex">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-6">
           <NavLinks />
           <div
-            className="text-[#0F172A] font-semibold hover:text-blue-900 cursor-pointer"
+            className="cursor-pointer font-semibold text-[#0F172A] hover:text-blue-900"
             onClick={() => {
               if (!token) {
                 toast.error("Login terlebih dahulu untuk memesan tiket.");
@@ -100,43 +108,59 @@ export default function Navbar() {
         </div>
 
         {/* Account Section */}
-        <div className="account relative flex gap-3">
+        <div className="relative flex items-center gap-3">
           {token ? (
+            // Logged-in state
             <div className="flex items-center gap-4">
               <img
-                onClick={() => setDropdownVisible(!dropdownVisible)}
-                className="object-cover shadow-lg cursor-pointer rounded-full size-[2.25rem] hover:opacity-[.8]"
-                src="/vite.svg"
+                src={
+                  avatar
+                    ? `${import.meta.env.VITE_BASE_API_URL}/user/${avatar}`
+                    : "/fallback-avatar.jpg"
+                }
                 alt="User avatar"
+                className="size-[2.25rem] cursor-pointer rounded-full object-cover shadow-lg hover:opacity-80"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                onError={(e) => {
+                  e.target.onerror = null; // Prevent infinite loop
+                  e.target.src = "/fallback-avatar.jpg";
+                }}
               />
-              <UserMenu />
+              {/* <img
+                src={`${import.meta.env.VITE_BASE_API_URL}/user/${avatar}`}
+                alt="User avatar"
+                className="size-[2.25rem] cursor-pointer rounded-full object-cover shadow-lg hover:opacity-80"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              /> */}
+              <UserDropdown />
               <div
-                className={`burger md:hidden ${menuStyle} text-lg hover:opacity-40`}
-                onClick={() => setMenuVisible(!menuVisible)}
+                className={`md:hidden text-lg ${menuItemStyle} hover:opacity-40`}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 <i className="nf nf-md-menu"></i>
               </div>
               <MobileMenu />
             </div>
           ) : (
-            <div className="flex items-center justify-end gap-2 relative">
+            // Guest state
+            <div className="relative flex items-center gap-2">
               <div className="flex gap-2">
                 <Link
-                  className={`${authStyle} border border-[#1D4ED8] text-[#1D4ED8]`}
                   to="/auth/login"
+                  className={`${authButtonStyle} border border-[#1D4ED8] text-[#1D4ED8]`}
                 >
                   Sign In
                 </Link>
                 <Link
-                  className={`${authStyle} bg-[#1D4ED8] text-white`}
                   to="/auth/register"
+                  className={`${authButtonStyle} bg-[#1D4ED8] text-white`}
                 >
                   Sign Up
                 </Link>
               </div>
               <div
-                className={`burger md:hidden ${menuStyle} text-lg hover:opacity-40`}
-                onClick={() => setMenuVisible(!menuVisible)}
+                className={`md:hidden text-lg ${menuItemStyle} hover:opacity-40`}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 <i className="nf nf-md-menu"></i>
               </div>
@@ -150,15 +174,15 @@ export default function Navbar() {
 }
 
 /**
- * Navigation List Item
+ * Navigation List Item Component
  */
-function ListItem({ to, page }) {
+function ListItem({ to, label }) {
   return (
     <Link
       to={to}
-      className="text-[#0F172A] font-semibold hover:text-blue-900"
+      className="font-medium text-[#0F172A] hover:text-blue-900"
     >
-      {page}
+      {label}
     </Link>
   );
 }

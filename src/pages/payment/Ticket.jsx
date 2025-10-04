@@ -4,7 +4,10 @@ import { historyContext as HistoryContext } from "../../context/history/historyC
 import { orderContext as OrderContext } from "../../context/order/orderContext";
 
 function Ticket() {
-  const { selectedMovie, selectedCinema, seats, date: scheduleDate } = useSelector((state) => state.order);
+  const { movie, schedule, seats } = useSelector((state) => state.order);
+  const { title } = movie;
+  const { showDate, showTime } = schedule;
+
   // const { movie, schedule, seat } = useSelector((state) => state.currDetail);
   // const { history, addHistory } = useContext(HistoryContext);
   // const { currOrder } = useContext(OrderContext)
@@ -19,10 +22,10 @@ function Ticket() {
   // }, [history]);
 
   const items = [
-    { title: "Movie", content: `${selectedMovie.title.slice(0, 11)}...` },
+    { title: "Movie", content: `${title.slice(0, 11)}...` },
     { title: "Category", content: "PG-13" },
-    { title: "Date", content: `${format(parseISO(scheduleDate), "dd LLL")}` },
-    { title: "Time", content: `${selectedCinema.time.toLowerCase()}` },
+    { title: "Date", content: `${format(parseISO(showDate), "dd LLL")}` },
+    { title: "Time", content: `${showTime}` },
     { title: "Count", content: `${seats.length}pcs` },
     { title: "Seats", content: `${seats.join(", ").slice(0, 12)}...` },
   ];

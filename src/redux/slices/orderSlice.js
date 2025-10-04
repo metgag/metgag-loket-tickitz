@@ -1,27 +1,34 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    scheduleId: null,
-    movieId: null,
-    date: null,
-    time: null,
-    location: null,
-    cinemaId: null,
+    movie: {},
+    schedule: {},
     seats: [],
-    selectedCinema: {},
-    selectedMovie: {},
+    payment: {},
 };
 
 export const orderSlice = createSlice({
     name: "order",
     initialState,
     reducers: {
-        bookTicket: (state, { payload }) => {
-            Object.assign(state, payload);
+        selectedMovie: (state, { payload }) => {
+            state.movie = payload;
         },
+        selectedSchedule: (state, { payload }) => {
+            state.schedule = payload;
+        },
+        selectedSeats: (state, { payload }) => {
+            state.seats = payload;
+        },
+        setPayment: (state, { payload }) => {
+            state.payment = payload;
+        },
+        clearOrder: () => initialState,
     },
 });
 
-export const { bookTicket } = orderSlice.actions;
+export const { 
+    selectedMovie, selectedSchedule, selectedSeats, setPayment, clearOrder,
+} = orderSlice.actions;
 
 export default orderSlice.reducer;

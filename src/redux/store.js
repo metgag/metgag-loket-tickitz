@@ -3,11 +3,10 @@ import storage from 'redux-persist/lib/storage';
 import { PERSIST, persistReducer, REHYDRATE } from "redux-persist";
 import persistStore from "redux-persist/es/persistStore";
 
-import movieReducer from './slices/movieSlice';
-import personalReducer from "./slices/personalSlice";
-import tokenReducer from './slices/tokenSlice.js';
-import cinemaReducer from './slices/cinemaSlice.js';
+import authReducer from "./slices/authSlice.js";
 import orderReducer from './slices/orderSlice.js';
+import userReducer from './slices/userSlice.js';
+// import scheduleReducer from './slices/scheduleSlice.js';
 
 const persistConfig = {
   key: "root",
@@ -17,11 +16,9 @@ const persistConfig = {
 const persistedReducer = persistReducer(
   persistConfig, 
   combineReducers({
-    auth: tokenReducer,
-    tmdb: movieReducer,
-    cinema: cinemaReducer,
+    auth: authReducer,
+    info: userReducer,
     order: orderReducer,
-    userInfo: personalReducer,
   }),
 );
 
