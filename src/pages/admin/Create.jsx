@@ -1,7 +1,7 @@
 import { format, parse } from "date-fns";
 import { convLocations, fixGenres } from "../../utils/movieUtil";
 import { useState } from "react";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 
 const inputStyle =
   "border border-[#DEDEDE] text-[#4E4B66] h-11 ps-6 bg-[#FCFDFE] rounded-sm";
@@ -115,6 +115,7 @@ const Create = () => {
 
   return (
     <main className="bg-[#f5f6f8] h-full py-12">
+    <Toaster />
       <form
         key={resetKey} // force form reset when key changes
         className="w-2/5 mx-auto bg-white p-12 rounded-xl shadow-2xs flex flex-col gap-3"

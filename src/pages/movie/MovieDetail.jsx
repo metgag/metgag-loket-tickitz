@@ -177,7 +177,7 @@ function MovieDetail() {
       />
 
       {/* Movie Info */}
-      <section className="mov-detail relative mt-24 px-6 md:mt-76 md:self-start md:px-28">
+      <section className="mov-detail relative px-6 md:self-start md:px-28 md:mt-72">
         <div className="flex flex-col md:flex-row gap-6 items-center md:items-end">
           <img
             className="w-3/4 md:w-1/6 rounded-lg shadow-lg"
@@ -290,45 +290,58 @@ function MovieDetail() {
           <div className="flex gap-8">
             <h4 className="font-semibold">Choose Cinema</h4>
             <h4 className="text-[#8692A6] font-bold">
-              {(isFiltered ? filteredSchedules : schedules).length} Result
+              {isFiltered ? filteredSchedules.length : 0} Result
             </h4>
           </div>
 
-          <ul className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {(isFiltered ? filteredSchedules : schedules).slice(0, 4).map((c) => (
-              <li key={c.schedule_id}>
-                <input
-                  type="radio"
-                  id={c.schedule_id}
-                  name="cinema"
-                  value={c.schedule_id}
-                  className="hidden peer"
-                  data-cinema-name={c.cinema_name}
-                />
-                <label
-                  htmlFor={c.schedule_id}
-                  className="inline-flex items-center justify-center w-full h-full py-5 border-2 border-[#DEDEDE] rounded-md cursor-pointer peer-checked:border-[#1D4ED8] hover:bg-gray-100"
-                >
-                  <img src={c.cinema_img} className="max-w-56" alt={c.cinema_name} />
-                </label>
-                <p>{c.cinema_name}</p>
-              </li>
-            ))}
-          </ul>
+          {isFiltered ? (
+            <>
+              <ul className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {filteredSchedules.slice(0, 4).map((c) => (
+                  <li key={c.schedule_id}>
+                    <input
+                      type="radio"
+                      id={c.schedule_id}
+                      name="cinema"
+                      value={c.schedule_id}
+                      className="hidden peer"
+                      data-cinema-name={c.cinema_name}
+                    />
+                    <label
+                      htmlFor={c.schedule_id}
+                      className="inline-flex items-center justify-center w-full h-full py-5 border-2 border-[#DEDEDE] rounded-md cursor-pointer peer-checked:border-[#1D4ED8] hover:bg-gray-100"
+                    >
+                      <img src={c.cinema_img} className="max-w-56" alt={c.cinema_name} />
+                    </label>
+                    <p>{c.cinema_name}</p>
+                  </li>
+                ))}
+              </ul>
 
-          {/* Pagination placeholder */}
-          <div className="flex justify-center gap-2 mt-9">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className={pgStyle}>
-                {n}
+              {/* Pagination placeholder */}
+              <div className="flex justify-center gap-2 mt-9">
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className={pgStyle}>
+                    {n}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <button type="submit" className={`${btnBlu} w-max self-center p-2 px-12`}>
-            Book Now
-          </button>
+              <button type="submit" className={`${btnBlu} w-max self-center p-2 px-12`}>
+                Book Now
+              </button>
+            </>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 min-h-[188px]">
+              <div className="col-span-2 md:col-span-4 flex items-center justify-center rounded-md">
+                {/* <p className="text-[#A0A3BD] italic">
+                  Please filter to see available cinemas
+                </p> */}
+              </div>
+            </div>
+          )}
         </form>
+
       </div>
     </main>
   );

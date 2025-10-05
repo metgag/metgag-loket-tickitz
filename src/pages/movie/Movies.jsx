@@ -33,7 +33,7 @@ export default function Movies() {
         const url = `${import.meta.env.VITE_BASE_API_URL}/movies/genres`;
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data)
+        // console.log(data);
         setGenres(data.result || []);
       } catch (err) {
         console.error("Failed to fetch genres:", err);
@@ -58,7 +58,7 @@ export default function Movies() {
           ? `${import.meta.env.VITE_BASE_API_URL}/movies?${params.toString()}`
           : `${import.meta.env.VITE_BASE_API_URL}/movies`;
 
-        console.log("Fetching:", url);
+        // console.log("Fetching:", url);
 
         const res = await fetch(url);
         const data = await res.json();
@@ -196,7 +196,7 @@ export default function Movies() {
                       src={
                         movie.poster_path
                           ? `${import.meta.env.VITE_BASE_API_URL}/poster/${movie.poster_path}`
-                          : `https://upload.wikimedia.org/wikipedia/commons/8/8d/ERR0R_NO_IMAGE_FOUND.jpg`
+                          : `/ERR0R_NO_IMAGE_FOUND-500-750.jpg`
                       }
                       alt={movie.title}
                     />

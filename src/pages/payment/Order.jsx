@@ -12,6 +12,8 @@ function Order() {
   const { movie, schedule } = useSelector((state) => state.order);
 
   const [seats, setSeats] = useState([]);
+  const [usedSeats, setUsedSeats] = useState([]);
+
   const [cinemaInfo, setCinemaInfo] = useState({
     cinemaName: "",
     time: "",
@@ -45,6 +47,32 @@ function Order() {
     };
 
     fetchCinemaInfo();
+  }, [scheduleId, token]);
+
+  useEffect(() => {
+    if (!scheduleId) return;
+
+    const getSeats = async () => {
+      try {
+        const url = `${import.meta.env.VITE_BASE_API_URL}/cinemas/${scheduleId}/seats`;
+        const options = {
+          headers: { Authorization: `Bearer ${token}` },
+        };
+
+        const response = await fetch(url, options);
+        const result = await response.json();
+
+        const { result: booked } = result;
+        const pos = booked.map((e) => e.pos);
+        console.log(pos);
+        setUsedSeats(pos);
+
+      } catch (err) {
+        console.err("Error fetching avail seats:", err);
+      }
+    }
+
+    getSeats();
   }, [scheduleId, token]);
 
   /** Generate seat labels like A1, A2... */
@@ -88,7 +116,7 @@ function Order() {
                 {genres.map((g) => (
                   <p
                     key={g.id}
-                    className="bg-[#A0A3BD1A] text-[#A0A3BD] px-3 py-1 rounded-full"
+                    className="bg-[#A0A3BD1A] text-[#A0A3BD] px-3.5 py-1 rounded-full"
                   >
                     {g.name}
                   </p>
@@ -113,12 +141,14 @@ function Order() {
                 labelRows
                 seats={generateSeats(1, 7)}
                 selected={seats}
+                usedSeats={usedSeats}
                 onToggle={toggleSeat}
               />
               {/* Right Grid */}
               <SeatGrid
                 seats={generateSeats(8, 14)}
                 selected={seats}
+                usedSeats={usedSeats}
                 onToggle={toggleSeat}
               />
             </form>
@@ -126,7 +156,7 @@ function Order() {
             {/* Seat Key */}
             <div className="flex flex-col gap-4">
               <h5 className="text-lg font-medium">Seating key</h5>
-              <div className="flex justify-center gap-12">
+              <div className="grid grid-cols-2 gap-4 md:flex justify-center md:gap-12">
                 <SeatLegend color="#FCFDFE" label="Available" border />
                 <SeatLegend color="#1D4ED8" label="Selected" />
                 <SeatLegend color="#F589D7" label="Love nest" />
@@ -189,30 +219,30 @@ function Order() {
 }
 
 /** Sub Components */
-function Seat({ id, name, selected, onChange }) {
+function Seat({ id, selected, onChange, disabled }) {
+  const isSelected = selected.includes(id);
+
   return (
-    <div className="size-10">
-      <label
-        htmlFor={id}
-        className={`h-full block ${selected.includes(name) ? "bg-[#1D4ED8]" : "bg-[#D6D8E7]"
-          } rounded-sm cursor-pointer hover:opacity-[.6]`}
-      />
-      <input
-        type="checkbox"
-        id={id}
-        name={name}
-        onChange={onChange}
-        className="hidden"
-      />
-    </div>
+    <button
+      type="button"
+      name={id}
+      onClick={onChange}
+      disabled={disabled}
+      className={`size-8 rounded-sm ${disabled
+        ? "bg-[#6E7191] cursor-not-allowed"
+        : isSelected
+          ? "bg-[#1D4ED8] cursor-pointer hover:opacity-70"
+          : "bg-[#D6D8E7] cursor-pointer hover:opacity-70"
+        }`}
+    />
   );
 }
 
-function SeatGrid({ labelRows = false, seats, selected, onToggle }) {
+function SeatGrid({ labelRows = false, seats, selected, onToggle, usedSeats = [] }) {
   return (
-    <div className="flex gap-8">
+    <div className="flex gap-8 overflow-x-auto md:overflow-x-visible">
       {labelRows && (
-        <div className="flex flex-col gap-y-5 text-lg font-semibold text-[#4E4B66]">
+        <div className="flex flex-col gap-y-3 text-[#4E4B66] flex-shrink-0">
           {["A", "B", "C", "D", "E", "F", "G"].map((row) => (
             <p key={row} className="h-8 flex items-center">
               {row}
@@ -220,19 +250,27 @@ function SeatGrid({ labelRows = false, seats, selected, onToggle }) {
           ))}
         </div>
       )}
-      <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-7 gap-3">
-          {seats.map((seatId) => (
-            <Seat
-              key={seatId}
-              id={seatId}
-              name={seatId}
-              selected={selected}
-              onChange={(e) => onToggle(e.target.name)}
-            />
-          ))}
+
+      <div className="flex flex-col gap-6 flex-shrink-0">
+        {/* Seats grid */}
+        <div className="grid grid-cols-7 gap-3 min-w-[28rem] md:min-w-0">
+          {seats.map((seatId) => {
+            const isUsed = usedSeats.includes(seatId);
+            return (
+              <Seat
+                key={seatId}
+                id={seatId}
+                name={seatId}
+                selected={selected}
+                onChange={(e) => onToggle(e.target.name)}
+                disabled={isUsed}
+              />
+            );
+          })}
         </div>
-        <div className="grid grid-cols-7 gap-x-2 text-center text-lg font-semibold text-[#4E4B66]">
+
+        {/* Column numbers */}
+        <div className="grid grid-cols-7 gap-x-2 text-center text-[#4E4B66] min-w-[28rem] md:min-w-0">
           {seats
             .map((s) => parseInt(s.replace(/[A-Z]/, ""), 10))
             .filter((v, i, arr) => arr.indexOf(v) === i)
@@ -243,6 +281,45 @@ function SeatGrid({ labelRows = false, seats, selected, onToggle }) {
       </div>
     </div>
   );
+
+  // return (
+  //   <div className="flex gap-8">
+  //     {labelRows && (
+  //       <div className="flex flex-col gap-y-3 text-[#4E4B66]">
+  //         {["A", "B", "C", "D", "E", "F", "G"].map((row) => (
+  //           <p key={row} className="h-8 flex items-center">
+  //             {row}
+  //           </p>
+  //         ))}
+  //       </div>
+  //     )}
+  //     <div className="flex flex-col gap-6">
+  //       <div className="grid grid-cols-7 gap-3">
+  //         {seats.map((seatId) => {
+  //           const isUsed = usedSeats.includes(seatId);
+  //           return (
+  //             <Seat
+  //               key={seatId}
+  //               id={seatId}
+  //               name={seatId}
+  //               selected={selected}
+  //               onChange={(e) => onToggle(e.target.name)}
+  //               disabled={isUsed}
+  //             />
+  //           );
+  //         })}
+  //       </div>
+  //       <div className="grid grid-cols-7 gap-x-2 text-center text-[#4E4B66]">
+  //         {seats
+  //           .map((s) => parseInt(s.replace(/[A-Z]/, ""), 10))
+  //           .filter((v, i, arr) => arr.indexOf(v) === i)
+  //           .map((n) => (
+  //             <p key={n}>{n}</p>
+  //           ))}
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 }
 
 function SeatLegend({ color, label, border }) {
