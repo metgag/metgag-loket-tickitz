@@ -1,46 +1,40 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { jwtDecode } from "jwt-decode";
 
-const initialState = [];
+const initialState = {
+    token: null,
+    email: null,
+    role: null,
+    issuedAt: null,
+    expiresAt: null,
+};
 
-export const authSlice = createSlice({
-  name: "users",
-  initialState,
-  reducers: {
-    addUser: (state, { payload }) => {
-      const index = state.findIndex((user) => {
-        return user.email === payload.email;
-      });
+const authSlice = createSlice({
+    initialState,
+    name: "auth",
+    reducers: {
+        setUser: (state, { payload }) => {
+            const decoded = jwtDecode(payload.token);
+            const { role, iat, exp, email } = decoded;
 
-      if (index === -1) {
-        state.push({
-          id: Math.floor(Math.random() * 1000) + 1,
-          email: payload.email,
-          pwd: payload.pwd,
-        });
-      }
+            state.token = payload.token;
+            state.email = email;
+            state.role = role;
+            state.issuedAt = iat;
+            state.expiresAt = exp;
+        },
+        clearUser: (state) => {
+            state.token = null;
+            state.email = null;
+            state.role = null;
+            state.issuedAt = null;
+            state.expiresAt = null;
+        },
     },
-    removeUser: (state, { payload }) => {
-      const index = state.findIndex((user) => {
-        return user.email === payload.email;
-      });
-
-      state.splice(index, 1);
-    },
-    resetPwd: (state, { payload }) => {
-      const index = state.findIndex((user) => {
-        return user.email === payload.email;
-      });
-
-      if (index !== -1) {
-        state[index] = {
-          ...state[index],
-          pwd: payload.pwd
-        };
-      }
-    }
-  }
 });
 
-export const { addUser, removeUser, resetPwd } = authSlice.actions;
+export const {
+    setUser, clearUser
+} = authSlice.actions;
 
 export default authSlice.reducer;

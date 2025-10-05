@@ -1,9 +1,100 @@
 import Preferences from './Preferences.jsx'
 import Order from './Order.jsx'
 import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { updateUser } from '../../redux/slices/userSlice.js';
+// import useAutoLogout from '../../hooks/useAutoLogout.js';
+// import { getProfile } from '../../redux/slices/personalSlice.js';
+// import axios from 'axios';
 
 function Profile() {
   const [menu, setMenu] = useState(false);
+  const { token } = useSelector((state) => state.auth);
+
+  const dispatch = useDispatch();
+
+  const {
+    first_name, last_name, phone_number, point_count, avatar,
+  } = useSelector((state) => state.info);
+  const profile = {
+    first_name,
+    last_name,
+    phone_number,
+    point_count,
+    avatar,
+  };
+
+  async function editAvatar(selectedFile) {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append("avatar", selectedFile);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) throw new Error(result.message || response.statusText);
+
+      // console.log("Avatar update response:", result);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_API_URL}/users/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+        // console.log(result);
+        const { avatar } = result.result;
+
+        setTimeout(() => {
+          dispatch(updateUser({
+            avatar,
+          }));
+        }, 800);
+
+      } catch (err) {
+        console.error(err);
+      }
+    } catch (err) {
+      console.error("Error updating avatar:", err);
+    }
+  }
+
+  // function editAvatar(selectedFile) {
+  //   const url = `${import.meta.env.VITE_BASE_API_URL}/users/`;
+  //   const options = {
+  //     method: "PATCH",
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   };
+  //   const request = new Request(url, options);
+  //   const formdat = new FormData();
+  //   formdat.append("avatar", selectedFile);
+
+  //   fetch(request, {
+  //     body: formdat,
+  //   })
+  //     .then((resp) => {
+  //       if (!resp.ok) throw resp.statusText;
+  //       return resp.json();
+  //     })
+  //     .then(res => {
+  //       console.log(res);
+  //     })
+  //     .catch(err => console.log(err));
+  // }
+
   const activeMenu = "text-[#14142B] font-semibold border-b border-[#1D4ED8]";
   const inactiveMenu = "text-[#AAAAAA] font-semibold yet-gray";
   const hoverMenu = "hover:cursor-pointer hover:opacity-[.6]";
@@ -26,12 +117,44 @@ function Profile() {
                 hover:opacity-60"></i>
           </div>
           <div
+            className='flex flex-col'
+          >
+            <div className="relative w-[7rem] h-[7rem] self-center">
+              <img
+                className={`user-pic shadow-lg object-cover rounded-full w-full h-full`}
+                src={`${import.meta.env.VITE_BASE_API_URL}/user/${avatar}`}
+              />
+              <label
+                htmlFor="profileUpload"
+                className="absolute bottom-0 right-0 cursor-pointer"
+              >
+                <i className="nf nf-md-lead_pencil text-lg"></i>
+              </label>
+              <input
+                type="file"
+                id="profileUpload"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    editAvatar(file);
+                  }
+                }}
+              />
+            </div>
+            {/* <div
             className="user-pic bg-[url(/vite.svg)] 
             bg-center bg-cover shadow-lg rounded-full w-[7rem] h-[7rem] self-center">
           </div>
+          <i className="nf nf-md-lead_pencil self-end"></i> */}
+          </div>
           <div className="whoami flex flex-col text-center gap-[.375rem]">
             <h3 className="font-semibold text-[#14142B]">
-              Jonas El Rodriguez
+              {first_name && last_name ?
+                `${first_name} ${last_name}`
+                :
+                "user"
+              }
             </h3>
             <p>Moviegoers</p>
           </div>
@@ -45,8 +168,10 @@ function Profile() {
                 rounded-[.75rem] p-[.875rem] gap-[1.5rem] relative 
                 overflow-hidden shadow-[0_12px_0_-6px_rgba(29,78,216,0.5)]">
               <h4 className="text-white">Moviegoers</h4>
-              <h3 className="text-white">320 <span
-                className="text-xs">points</span></h3>
+              <h3 className="text-white">
+                {point_count}
+                <span
+                  className="text-xs">points</span></h3>
               <div
                 className="circle w-[5rem] h-[5rem] rounded-full 
                   bg-[#FFFFFF4D] absolute top-[-36px] right-[-8px] circle-1">
@@ -60,7 +185,9 @@ function Profile() {
             </div>
           </div>
           <div className="bar-point flex flex-col items-center gap-[.625rem]">
-            <h4 className="font-medium text-sm">180 points become a master
+            <h4 className="font-medium text-sm">
+              {500 - point_count}
+              points become a master
             </h4>
             <div
               className="bar w-[94%] bg-[#F5F6F8] 
@@ -87,19 +214,19 @@ function Profile() {
           </h4>
         </div>
 
-        {menu ? <Order /> : <Preferences />}
+        {menu ? <Order /> : <Preferences profile={profile} />}
 
       </section>
-      {!menu &&
+      {/* {!menu &&
         <button
           className="col-start-1 col-end-3 w-fit bg-[#1D4ED8] 
         justify-self-center p-[.75rem_5rem] rounded-xl text-white font-medium 
         hover:opacity-80 hover:cursor-pointer self-center md:self-start">
           Update changes
         </button>
-      }
+      } */}
     </main>
   )
 }
 
-export default Profile
+export default Profile;

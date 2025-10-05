@@ -13,40 +13,64 @@ import Profile from './pages/profile/Profile.jsx'
 import Table from './pages/admin/Table.jsx'
 import Chart from './pages/admin/Chart.jsx'
 import Forget from './pages/auth/Forget.jsx'
+import Create from './pages/admin/Create.jsx'
+import RoleRoutes from './components/RoleRoutes.jsx'
+import AdminNavbar from './components/AdminNavbar.jsx'
+import AutoLogout from './components/AutoLogout.jsx'
 
 function Router() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Auth routes */}
         <Route path="auth">
           <Route path="register" element={<Register />} />
           <Route path="login" element={<Login />} />
           <Route path="forget" element={<Forget />} />
         </Route>
 
-        <Route index element={(
-          <>
-            <Navbar />
-            <Index />
-            <Footer />
-          </>
-        )} />
-
+        {/* Public routes */}
+        <Route element={<RouteLayout />}>
+          <Route index element={<Index />} />
+        </Route>
         <Route path="movie" element={<RouteLayout />}>
           <Route path="list" element={<Movies />} />
-          <Route path="order" element={<Order />} />
-          <Route path="payment" element={<Payment />} />
           <Route path="detail/:movieId" element={<MovieDetail />} />
-          <Route path="ticket" element={<Ticket />} />
+
+          {/* Movie routes protected for "user" */}
+          <Route element={
+            <AutoLogout>
+              <RoleRoutes allowedRoles={["user"]} />
+            </AutoLogout>
+          }>
+            <Route path="order" element={<Order />} />
+            <Route path="payment" element={<Payment />} />
+            <Route path="ticket" element={<Ticket />} />
+          </Route>
         </Route>
 
-        <Route path="profile" element={<ProfileLayout />}>
-          <Route index element={<Profile />} />
+        {/* Profile routes (protected for "user") */}
+        <Route element={
+          <AutoLogout>
+            <RoleRoutes allowedRoles={["user"]} />
+          </AutoLogout>
+        }>
+          <Route path="profile" element={<ProfileLayout />}>
+            <Route index element={<Profile />} />
+          </Route>
         </Route>
 
-        <Route path="admin" element={<ProfileLayout />}>
-          <Route path="chart" element={<Chart />} />
-          <Route path="table" element={<Table />} />
+        {/* Admin routes (protected for "admin") */}
+        <Route element={
+          <AutoLogout>
+            <RoleRoutes allowedRoles={["admin"]} />
+          </AutoLogout>
+        }>
+          <Route path="admin" element={<AdminLayout />}>
+            <Route path="chart" element={<Chart />} />
+            <Route path="table" element={<Table />} />
+            <Route path="create" element={<Create />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
@@ -55,18 +79,29 @@ function Router() {
 
 function RouteLayout() {
   return (
-    <>
-      <Navbar />
-      <Outlet />
-      <Footer />
-    </>
-  )
+    <AutoLogout>
+      <>
+        <Navbar />
+        <Outlet />
+        <Footer />
+      </>
+    </AutoLogout>
+  );
 }
 
 function ProfileLayout() {
   return (
     <>
       <Navbar />
+      <Outlet />
+    </>
+  );
+}
+
+function AdminLayout() {
+  return (
+    <>
+      <AdminNavbar />
       <Outlet />
     </>
   )

@@ -1,139 +1,150 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
-import { discoverMovieOptions, genreOptions, movieOptions, searchOptions } from "../../utils/movieOptions";
 
 const initialState = {
   movies: [],
-  genres: [],
+  upcoming: [],
+  // genres: [],
+  detail: {},
   isLoading: false,
   isSuccess: false,
   isFailed: false,
   error: null,
 };
 
-export const getMovie = createAsyncThunk(
-  "movies/get_movie",
-  async (_, { rejectWithValue }) => {
+export const getDetail = createAsyncThunk(
+  "movies/get_detail",
+  async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.request(movieOptions());
-      const { results } = response.data;
+      const url = `${import.meta.env.VITE_BASE_API_URL}/movies/${id}`;
+      const resp = await fetch(url);
 
-      return results.map((e) => {
-        const {
-          title, poster_path, backdrop_path, genre_ids, release_date
-        } = e;
-
-        return {
-          title, poster_path, backdrop_path, genre_ids, release_date
-        };
-      });
-    } catch (err) { return rejectWithValue(err); }
+      if (!resp.ok) throw resp.statusText;
+      const data = await resp.json();
+      return data.result;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
   }
-);
-
-export const getDiscoverMovie = createAsyncThunk(
-  "movies/get_discover",
-  async ({ page, genre }, { rejectWithValue }) => {
-    try {
-      const response = await axios.request(discoverMovieOptions(page, genre));
-      return response.data.results;
-    } catch (err) { return rejectWithValue(err); }
-  }
-);
-
-export const getGenres = createAsyncThunk(
-  "movies/get_genres",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.request(genreOptions());
-      return response.data.genres;
-    } catch (err) { return rejectWithValue(err); }
-  }
-);
-
-export const getSearch = createAsyncThunk(
-  "movies/get_search",
-  async ({ query, page }, { rejectWithValue }) => {
-    try {
-      const response = await axios.request(searchOptions(query, page));
-      return response.data.results;
-    } catch (err) { return rejectWithValue(err); }
-  }
-);
+)
 
 const movieSlice = createSlice({
   name: "tmdb",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder
-      .addCase(getDiscoverMovie.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isFailed = false;
-        state.error = null;
-      })
-      .addCase(getDiscoverMovie.fulfilled, (state, { payload }) => {
-        state.movies = payload;
-        state.isSuccess = true;
-        state.isLoading = false;
-      })
-      .addCase(getDiscoverMovie.rejected, (state, { payload, error }) => {
-        state.error = { payload, error };
-        state.isFailed = true;
-        state.isLoading = false;
-      })
+    // builder
+    //   .addCase(getDetail.pending, (state) => {
+    //     state.isLoading = true;
+    //     state.isSuccess = false;
+    //     state.isFailed = false;
+    //     state.error = null;
+    //   })
+    //   .addCase(getDetail.fulfilled, (state, { payload }) => {
+    //     state.detail = payload;
+    //     state.isSuccess = true;
+    //     state.isLoading = false;
+    //   })
+    //   .addCase(getDetail.rejected, (state, { payload, error }) => {
+    //     state.error = { payload, error };
+    //     state.isFailed = true;
+    //     state.isLoading = false;
+    //   })
 
-      .addCase(getGenres.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isFailed = false;
-        state.error = null;
-      })
-      .addCase(getGenres.fulfilled, (state, { payload }) => {
-        state.genres = payload;
-        state.isSuccess = true;
-        state.isLoading = false;
-      })
-      .addCase(getGenres.rejected, (state, { payload, error }) => {
-        state.error = { payload, error };
-        state.isFailed = true;
-        state.isLoading = false;
-      })
+    //   .addCase(getFilter.fulfilled, (state, { payload }) => {
+    //     state.movies = payload;
+    //     state.isSuccess = true;
+    //     state.isLoading = false;
+    //   })
+    //   .addCase(getFilter.rejected, (state, { payload, error }) => {
+    //     state.error = { payload, error };
+    //     state.isFailed = true;
+    //     state.isLoading = false;
+    //   })
 
-      .addCase(getMovie.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isFailed = false;
-        state.error = null;
-      })
-      .addCase(getMovie.fulfilled, (state, { payload }) => {
-        state.movies = payload;
-        state.isSuccess = true;
-        state.isLoading = false;
-      })
-      .addCase(getMovie.rejected, (state, { payload, error }) => {
-        state.error = { payload, error };
-        state.isFailed = true;
-        state.isLoading = false;
-      })
+    //   .addCase(getUpcoming.pending, (state) => {
+    //     state.isLoading = true;
+    //     state.isSuccess = false;
+    //     state.isFailed = false;
+    //     state.error = null;
+    //   })
+    //   .addCase(getUpcoming.fulfilled, (state, { payload }) => {
+    //     state.upcoming = payload;
+    //     state.isSuccess = true;
+    //     state.isLoading = false;
+    //   })
+    //   .addCase(getUpcoming.rejected, (state, { payload, error }) => {
+    //     state.error = { payload, error };
+    //     state.isFailed = true;
+    //     state.isLoading = false;
+    //   })
 
-      .addCase(getSearch.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isFailed = false;
-        state.error = null;
-      })
-      .addCase(getSearch.fulfilled, (state, { payload }) => {
-        state.movies = payload;
-        state.isSuccess = true;
-        state.isLoading = false;
-      })
-      .addCase(getSearch.rejected, (state, { payload, error }) => {
-        state.error = { payload, error };
-        state.isFailed = true;
-        state.isLoading = false;
-      })
+    //   .addCase(getDiscoverMovie.pending, (state) => {
+    //     state.isLoading = true;
+    //     state.isSuccess = false;
+    //     state.isFailed = false;
+    //     state.error = null;
+    //   })
+    //   .addCase(getDiscoverMovie.fulfilled, (state, { payload }) => {
+    //     state.movies = payload;
+    //     state.isSuccess = true;
+    //     state.isLoading = false;
+    //   })
+    //   .addCase(getDiscoverMovie.rejected, (state, { payload, error }) => {
+    //     state.error = { payload, error };
+    //     state.isFailed = true;
+    //     state.isLoading = false;
+    //   })
+
+      // .addCase(getGenres.pending, (state) => {
+      //   state.isLoading = true;
+      //   state.isSuccess = false;
+      //   state.isFailed = false;
+      //   state.error = null;
+      // })
+      // .addCase(getGenres.fulfilled, (state, { payload }) => {
+      //   state.genres = payload;
+      //   state.isSuccess = true;
+      //   state.isLoading = false;
+      // })
+      // .addCase(getGenres.rejected, (state, { payload, error }) => {
+      //   state.error = { payload, error };
+      //   state.isFailed = true;
+      //   state.isLoading = false;
+      // })
+
+      // .addCase(getMovie.pending, (state) => {
+      //   state.isLoading = true;
+      //   state.isSuccess = false;
+      //   state.isFailed = false;
+      //   state.error = null;
+      // })
+      // .addCase(getMovie.fulfilled, (state, { payload }) => {
+      //   state.movies = payload;
+      //   state.isSuccess = true;
+      //   state.isLoading = false;
+      // })
+      // .addCase(getMovie.rejected, (state, { payload, error }) => {
+      //   state.error = { payload, error };
+      //   state.isFailed = true;
+      //   state.isLoading = false;
+      // })
+
+      // .addCase(getSearch.pending, (state) => {
+      //   state.isLoading = true;
+      //   state.isSuccess = false;
+      //   state.isFailed = false;
+      //   state.error = null;
+      // })
+      // .addCase(getSearch.fulfilled, (state, { payload }) => {
+      //   state.movies = payload;
+      //   state.isSuccess = true;
+      //   state.isLoading = false;
+      // })
+      // .addCase(getSearch.rejected, (state, { payload, error }) => {
+      //   state.error = { payload, error };
+      //   state.isFailed = true;
+      //   state.isLoading = false;
+      // })
   }
 });
 

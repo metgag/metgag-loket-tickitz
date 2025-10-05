@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.21 as builder
+FROM node:alpine3.22 as builder
 
 WORKDIR /app
 
@@ -8,9 +8,12 @@ RUN npm ci
 
 COPY . .
 
+ARG API_URL
+ENV VITE_BASE_API_URL=$API_URL
+
 RUN npm run build
 
-FROM nginx:stable-bookworm
+FROM nginx:alpine3.22
 
 COPY --from=builder /app/nginx/nginx.conf /etc/nginx/
 COPY --from=builder /app/nginx/sites-available/app.conf /etc/nginx/sites-available/

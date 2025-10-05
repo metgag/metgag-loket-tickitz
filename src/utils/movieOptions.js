@@ -1,3 +1,23 @@
+export const movieFilterOptions = () => {
+  return {
+    method: "GET",
+    url: `${import.meta.env.VITE_BASE_API_URL}/movies`,
+    headers: {
+      accept: "application/json",
+    },
+  };
+}
+
+export const upcomingOptions = () => {
+  return {
+    method: "GET",
+    url: `${import.meta.env.VITE_BASE_API_URL}/movies/upcoming`,
+    headers: {
+      accept: "application/json",
+    },
+  };
+};
+
 export const movieOptions = (page = 1) => {
   return {
     method: 'GET',
